@@ -1,0 +1,44 @@
+Project JSON
+
+{
+	project_id:{
+		Name,
+
+		Description,
+
+		start_date,
+
+		end_date,
+
+		owner
+	}
+}
+
+
+Task JSON
+
+{
+	task_id:{
+		project_id,
+		due_date,
+		description,
+		status,
+		owner
+	}
+}
+_________________________________________________________________________________________________________________
+
+ROLES
+  |
+  |___1. Admin
+  |		-Creates project
+  |		-Assign role to users
+  |		-Assign task creators to project
+  |
+  |___2. Task creator
+  |		-Create tasks
+  |		-Assign users to task
+  |		-Change status of task
+  |
+  |___3. User
+		-Change the status of task
