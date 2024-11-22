@@ -5,8 +5,20 @@ from datetime import date
 from typing import  Annotated, Optional
 from database import engine,SessionLocal
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
+origin=[
+    "http://localhost:5173"
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origin,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+
+)
 
 class ProjectBase(BaseModel):
     project_id: int
@@ -90,9 +102,9 @@ async def get_projects(db:db_dependency):
     if projects is None:
         raise HTTPException(status_code=404,detail="No projects")
     return projects
-@app.get('/tasks',status_code=status.HTTP_200_OK)
-async def get_tasks(db:db_dependency):
-    tasks=db.query(models.Task).all()
+@app.get('{project_id}/tasks',status_code=status.HTTP_200_OK)
+async def get_tasks(project_id:int,db:db_dependency):
+    tasks=db.query(models.Task).filter(models.Task.project_id==project_id).all()
     if tasks is None:
         raise HTTPException(status_code=404,detail="No projects")
     return tasks
