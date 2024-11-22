@@ -1,14 +1,15 @@
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import IndexPage from './components/IndexPage.jsx';
 
-import './App.css'
-import Projects from './components/Projects'
-
-function App() {
-
+const App = () => {
   return (
-    <>
-    <Projects/>
-    </>
-  )
-}
+    <Router>
+        <Routes>
+          <Route path="/" element={<IndexPage/>} />
+        </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;
