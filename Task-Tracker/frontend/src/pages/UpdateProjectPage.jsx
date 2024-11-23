@@ -16,6 +16,8 @@ const UpdateProjectPage = () => {
   const [error, setError] = useState(null);
 
   const handleUpdate = async (e) => {
+
+    
     e.preventDefault();
     setLoading(true);
     try {
