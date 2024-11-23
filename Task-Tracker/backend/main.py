@@ -21,7 +21,7 @@ app.add_middleware(
 )
 
 class ProjectBase(BaseModel):
-    project_id: int
+    #project_id: int
     project_name:str
     project_description: str
     start_date: date
@@ -35,7 +35,7 @@ class UpdateProjectBase(BaseModel):
     project_owner_id:Optional[int]=None
 
 class TaskBase(BaseModel):
-    task_id :int
+    #task_id :int
     task_name: str
     task_description:str
     task_status :str
@@ -102,9 +102,9 @@ async def get_projects(db:db_dependency):
     if projects is None:
         raise HTTPException(status_code=404,detail="No projects")
     return projects
-@app.get('{project_id}/tasks',status_code=status.HTTP_200_OK)
-async def get_tasks(project_id:int,db:db_dependency):
-    tasks=db.query(models.Task).filter(models.Task.project_id==project_id).all()
+@app.get('/tasks',status_code=status.HTTP_200_OK)
+async def get_tasks(db:db_dependency):
+    tasks=db.query(models.Task).all()
     if tasks is None:
         raise HTTPException(status_code=404,detail="No projects")
     return tasks

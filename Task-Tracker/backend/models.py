@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 
 class Project(Base):
     __tablename__ = 'projects'
-    project_id = Column(Integer, primary_key=True, index=True, nullable=False)
+    project_id = Column(Integer, primary_key=True,index=True, autoincrement=True)
     project_name = Column(String(32), nullable=False)
     project_description = Column(String(150))
     start_date = Column(Date, nullable=False)
@@ -18,7 +18,7 @@ class Project(Base):
 
 class Task(Base):
     __tablename__ = 'tasks'
-    task_id = Column(Integer, primary_key=True, index=True, nullable=False)
+    task_id = Column(Integer, primary_key=True,index=True ,autoincrement=True)
     task_name = Column(String(32), nullable=False)
     task_description = Column(String(150))
     task_status = Column(String(25), nullable=False)
