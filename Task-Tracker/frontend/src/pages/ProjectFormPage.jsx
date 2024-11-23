@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const ProjectFormPage = ({ onAddProject }) => {
-  const [projectId, setProjectId] = useState('');
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -13,7 +12,7 @@ const ProjectFormPage = ({ onAddProject }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newProject = {
-      project_id: projectId,
+      
       project_name: projectName,
       project_description: projectDescription,
       start_date: startDate,
@@ -33,16 +32,7 @@ const ProjectFormPage = ({ onAddProject }) => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-full max-w-md">
         <h2 className="text-2xl font-semibold mb-4">Add New Project</h2>
-        <div className="mb-4">
-          <label className="block text-gray-700">Project ID</label>
-          <input
-            type="text"
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
+        
         <div className="mb-4">
           <label className="block text-gray-700">Project Name</label>
           <input

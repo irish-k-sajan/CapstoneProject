@@ -181,14 +181,7 @@ const ProjectPage = () => {
             <h2 className="text-2xl font-semibold mb-4">Add New Task</h2>
             <form onSubmit={handleAddTask}>
               <div className="mb-4">
-                <label className="block text-gray-700">Task ID</label>
-                <input
-                  type="text"
-                  value={taskId}
-                  onChange={(e) => setTaskId(e.target.value)}
-                  className="w-full p-2 border rounded"
-                  required
-                />
+                
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700">Task Name</label>
