@@ -5,11 +5,23 @@ from datetime import date
 from typing import  Annotated, Optional
 from database import engine,SessionLocal
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
+origin=[
+    "http://localhost:5173"
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origin,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+
+)
 
 class ProjectBase(BaseModel):
-    project_id: int
+    #project_id: int
     project_name:str
     project_description: str
     start_date: date
@@ -23,7 +35,7 @@ class UpdateProjectBase(BaseModel):
     project_owner_id:Optional[int]=None
 
 class TaskBase(BaseModel):
-    task_id :int
+    #task_id :int
     task_name: str
     task_description:str
     task_status :str
