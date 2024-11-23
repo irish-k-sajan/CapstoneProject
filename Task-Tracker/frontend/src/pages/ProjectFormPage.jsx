@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate,NavLink } from 'react-router-dom';
 import axios from 'axios';
 
 const ProjectFormPage = ({ onAddProject }) => {
@@ -74,6 +74,9 @@ const ProjectFormPage = ({ onAddProject }) => {
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
           Add Project
         </button>
+        <Link to="http://localhost:5173/projects" className="bg-white text-blue-500 mx-5">
+          Cancel
+        </Link>        
       </form>
     </div>
   );
