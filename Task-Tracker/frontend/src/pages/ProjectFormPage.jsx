@@ -29,7 +29,7 @@ const ProjectFormPage = ({ onAddProject }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-500 to-gray-100 p-4">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-full max-w-md">
         <h2 className="text-2xl font-semibold mb-4">Add New Project</h2>
         
@@ -43,7 +43,7 @@ const ProjectFormPage = ({ onAddProject }) => {
             required
           />
         </div>
-        <div className="mb-4">
+        <div className="mb-4 ">
           <label className="block text-gray-700">Project Description</label>
           <textarea
             value={projectDescription}
