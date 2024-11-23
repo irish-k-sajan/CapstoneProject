@@ -18,7 +18,7 @@ const ProjectFormPage = ({ onAddProject }) => {
       project_description: projectDescription,
       start_date: startDate,
       end_date: endDate,
-      project_owner_id: 1, // Assuming a static owner ID for now
+      project_owner_id: 1, 
     };
 
     try {
