@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Logout from '../components/Logout.jsx';
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -69,7 +70,7 @@ const ProjectPage = () => {
 
   const handleDelete = async () => {
     try {
-      const tasksResponse = await axios.get('http://localhost:8000/tasks');
+      const tasksResponse = await axios.get('http://localhost:8000/tasks/');
       const projectTasks = tasksResponse.data.filter(task => task.project_id === parseInt(projectId));
 
       for (const task of projectTasks) {
@@ -121,6 +122,7 @@ const ProjectPage = () => {
   return (
     <div className="min-h-screen p-4 bg-gray-100">
       <h1 className="text-3xl font-bold mb-4">{project.project_name}</h1>
+      <Logout/>
       <p className="text-gray-700 mb-4">{project.project_description}</p>
       <p className="text-gray-500"><strong>Start Date:</strong> {new Date(project.start_date).toLocaleDateString()}</p>
       <p className="text-gray-500"><strong>End Date:</strong> {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</p>
