@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchProjects } from '../utils/dataFetcher';
 import axios from 'axios';
+import Logout from '../components/Logout';
 
 const ProjectsListPage = () => {
   const [projects, setProjects] = useState([]);
@@ -34,6 +35,7 @@ const ProjectsListPage = () => {
   return (
     <div className="min-h-screen p-4 bg-gradient-to-l bg-gradient-to-b from-orange-500 ">
       <h1 className="text-3xl font-bold mb-6 flex justify-center">Projects</h1>
+      <Logout/>
       <button
         onClick={() => navigate('/add-project')}
         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-6"
