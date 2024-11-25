@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate,NavLink } from 'react-router-dom';
 import axios from 'axios';
 
 const ProjectFormPage = ({ onAddProject }) => {
@@ -29,7 +29,7 @@ const ProjectFormPage = ({ onAddProject }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-500 to-gray-100 p-4">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-full max-w-md">
         <h2 className="text-2xl font-semibold mb-4">Add New Project</h2>
         
@@ -43,7 +43,7 @@ const ProjectFormPage = ({ onAddProject }) => {
             required
           />
         </div>
-        <div className="mb-4">
+        <div className="mb-4 ">
           <label className="block text-gray-700">Project Description</label>
           <textarea
             value={projectDescription}
@@ -74,6 +74,9 @@ const ProjectFormPage = ({ onAddProject }) => {
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
           Add Project
         </button>
+        <Link to="http://localhost:5173/projects" className="bg-white text-blue-500 mx-5">
+          Cancel
+        </Link>        
       </form>
     </div>
   );

@@ -120,12 +120,12 @@ const ProjectPage = () => {
   if (!project) return <p>Project not found</p>;
 
   return (
-    <div className="min-h-screen p-4 bg-gray-100">
+    <div className="min-h-screen p-4 bg-gradient-to-b from-orange-500 to-gray-100 ">
       <h1 className="text-3xl font-bold mb-4">{project.project_name}</h1>
       <Logout/>
       <p className="text-gray-700 mb-4">{project.project_description}</p>
-      <p className="text-gray-500"><strong>Start Date:</strong> {new Date(project.start_date).toLocaleDateString()}</p>
-      <p className="text-gray-500"><strong>End Date:</strong> {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</p>
+      <p className="text-gray-700"><strong>Start Date:</strong> {new Date(project.start_date).toLocaleDateString()}</p>
+      <p className="text-gray-700"><strong>End Date:</strong> {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</p>
       <div className="flex space-x-4 mb-6 my-4">
         <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Delete Project</button>
         <button onClick={handleUpdate} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Update Project</button>
@@ -136,7 +136,7 @@ const ProjectPage = () => {
         <p>No tasks available for this project.</p>
       ) : (
         tasks.map((task) => (
-          <div key={task.task_id} className="task-item border p-4 mb-4 flex justify-between items-center rounded-lg">
+          <div key={task.task_id} className="task-item border p-4 mb-4 flex justify-between items-center rounded-lg bg-gradient-to-r from-gray-200 to-gray-300">
               <div>
                   <h3 className="font-bold">{task.task_name}</h3>
                   <p>{task.task_description}</p>

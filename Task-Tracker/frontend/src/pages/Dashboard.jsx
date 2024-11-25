@@ -1,16 +1,9 @@
 import { Link } from "react-router-dom";
-import Logout from "../components/Logout";
 
 export default function Dashboard(){
 
     return (
-      <div>
-      <div className="flex justify-between items-center w-full">
-                <div></div> {/* Empty div to push the Logout button to the right */}
-                <Logout />
-            </div>
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-      
       <h1 className="text-4xl font-bold mb-4">Welcome to the Task Tracker Application</h1>
       
       <p className="text-lg mb-8">Manage your projects and users efficiently.</p>
