@@ -17,18 +17,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 models.Base.metadata.create_all(bind=engine)
-origin=[
-    "http://localhost:5173"
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origin,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-
-)
-
 class ProjectBase(BaseModel):
     project_name:str
     project_description: str
@@ -72,6 +60,8 @@ class UpdateUserRoleBase(BaseModel):
     role_id:Optional[int]=None
     project_id:Optional[UUID]=None
     employee_id:Optional[str]=None
+class AdminBase(BaseModel):
+    employee_id:str
     
 def get_db():
     db=SessionLocal()
@@ -178,6 +168,12 @@ async def delete_user_role(user_role_id: int, db:db_dependency):
         raise HTTPException(status_code=404,detail="Project not found")
     db.delete(db_user_role)
     db.commit()
+@app.get('/admin',status_code=status.HTTP_200_OK)
+async def admin(db:db_dependency):
+    admins=db.query(models.Admin).all()
+    if admins is None:
+        raise HTTPException(status_code=404,detail="No projects")
+    return admins
 
 
     
