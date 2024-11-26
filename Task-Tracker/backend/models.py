@@ -54,5 +54,10 @@ class UserRole(Base):
     project_user=relationship("Project",back_populates="user_project")
     user_emp=relationship("Employee",back_populates="emp_user")
     role_user=relationship("Role",back_populates="user_role")
+class Admin(Base):
+    __tablename__='admin_users'
+    admin_id=Column(Integer,primary_key=True,autoincrement=True)
+    employee_id=Column(String(50), ForeignKey('employees.employee_id'),nullable=False)
+    admin_emp=relationship("Employee",back_populates="emp_admin")
 
 
