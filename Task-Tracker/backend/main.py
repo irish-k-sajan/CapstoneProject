@@ -101,6 +101,12 @@ async def read_project(project_id:str, db:db_dependency):
     if project is None:
         raise HTTPException(status_code=404,detail='Project not found')
     return project
+@app.get('/user-role/{user_id}',status_code=status.HTTP_200_OK)
+async def read_user_role(user_id:str, db:db_dependency):
+    projects=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id).all()
+    if projects is None:
+        raise HTTPException(status_code=404,detail='Projects not found')
+    return projects
 @app.get('/tasks/{task_id}',status_code=status.HTTP_200_OK)
 async def read_task(task_id: str, db:db_dependency):
     task=db.query(models.Task).filter(models.Task.task_id==task_id).first()

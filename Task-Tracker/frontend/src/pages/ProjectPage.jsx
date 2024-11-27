@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Logout from '../components/Logout.jsx';
+import Select from 'react-select';
 
 const ProjectPage = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [employees,setEmployees]=useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
@@ -15,10 +18,16 @@ const ProjectPage = () => {
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [taskStatus, setTaskStatus] = useState('new');
+
   const [taskOwnerId, setTaskOwnerId] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
+  const [refresh,setRefresh]=useState(0)
+  const [showAddTaskCreatorForm,setShowAddTaskCreatorForm]=useState(false);
+  const [showAddReadOnlyUserForm,setShowAddReadOnlyUserForm]=useState(false);
+  const [showSuccessMessage,setShowSuccessMessage]=useState(false)
+  const [notification, setNotification] = useState('');
 
   const openUpdateForm = (task) => {
     setCurrentTask(task);
@@ -55,10 +64,17 @@ const ProjectPage = () => {
       try {
         const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}`);
         const tasksResponse = await axios.get('http://localhost:8000/tasks');
+        const employeeResponse = await axios.get('http://localhost:8000/user')
+        const employeeOptions = employeeResponse.data.map(employee => ({
+          value: employee.employee_id,
+          label: `${employee.employee_name} (${employee.employee_email})`,
+      }));
         // console.log(tasksResponse)
         const projectTasks = tasksResponse.data.filter(task => task.project_id === projectId);
         setProject(projectResponse.data);
         setTasks(projectTasks);
+        setEmployees(employeeOptions);
+        console.log(employees);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -67,7 +83,7 @@ const ProjectPage = () => {
     };
 
     getProjectData();
-  }, [projectId,tasks]);
+  }, [projectId,refresh]);
 
   const handleDelete = async () => {
     try {
@@ -100,8 +116,8 @@ const ProjectPage = () => {
       due_date: dueDate,
       project_id: projectId,
     };
-    console.log(projectId)
-
+    //console.log(projectId)
+    
     try {
       await axios.post('http://localhost:8000/create-task/', newTask);
       setTasks([...tasks,newTask])
@@ -112,6 +128,7 @@ const ProjectPage = () => {
       setTaskStatus('new');
       setTaskOwnerId('');
       setDueDate('');
+      setRefresh(refresh+1)
       
     } catch (err) {
       console.error('Failed to add task', err);
@@ -121,6 +138,52 @@ const ProjectPage = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
   if (!project) return <p>Project not found</p>;
+  const handleAddTaskCreator=async(e)=>{
+    e.preventDefault();
+    const employeeId=selectedEmployee.value;
+    const roleId=2;
+    const newProjectRole={
+      employee_id:employeeId,
+      role_id:roleId,
+      project_id:projectId
+    }
+    try{
+      await axios.post('http://localhost:8000/create-user-role',newProjectRole);
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 2000);
+      setShowAddTaskCreatorForm(false);
+    }
+    catch(e){
+      console.error('Failed to add task creator', e);
+    }
+
+
+  }
+  const handleAddReadOnlyUser=async(e)=>{
+    e.preventDefault();
+    const employeeId=selectedEmployee.value;
+    const roleId=3;
+    const newProjectRole={
+      employee_id:employeeId,
+      role_id:roleId,
+      project_id:projectId
+    }
+    try{
+      await axios.post('http://localhost:8000/create-user-role',newProjectRole);
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 2000);
+      setShowAddReadOnlyUserForm(false);
+      
+    }
+    catch(e){
+      console.error('Failed to add read only user', e);
+    }
+
+  }
 
   return (
     <div className="min-h-screen p-4 bg-gradient-to-b from-orange-500 to-gray-100 ">
@@ -130,6 +193,8 @@ const ProjectPage = () => {
       <p className="text-gray-700"><strong>Start Date:</strong> {new Date(project.start_date).toLocaleDateString()}</p>
       <p className="text-gray-700"><strong>End Date:</strong> {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</p>
       <div className="flex space-x-4 mb-6 my-4">
+        <button onClick={()=>setShowAddTaskCreatorForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Task Creator</button>
+        <button onClick={()=>setShowAddReadOnlyUserForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Read-only User</button>
         <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Delete Project</button>
         <button onClick={handleUpdate} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Update Project</button>
         <button onClick={() => setShowTaskForm(true)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">Add Task</button>
@@ -287,6 +352,63 @@ const ProjectPage = () => {
                     <button type="button" onClick={() => setShowUpdateForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
                 </div>
             </form>
+        </div>
+    </div>
+)}
+  {showAddTaskCreatorForm && (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        
+            <h2 className="text-xl font-bold mb-4">Add Task Creator</h2>
+            <form onSubmit={handleAddTaskCreator}>
+                <label className="block mb-2">
+                    User
+                    <Select
+                            options={employees}
+                            value={selectedEmployee}
+                            onChange={(selectedOption)=>setSelectedEmployee(selectedOption)}
+                            isSearchable
+                            placeholder="Select an employee"
+                            className="w-full"
+                        />
+                </label>
+                <div className="flex justify-end">
+                    <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 mr-2">Add Task Creator</button>
+                    <button type="button" onClick={() => setShowAddTaskCreatorForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+)}
+{showAddReadOnlyUserForm && (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 className="text-xl font-bold mb-4">Add Read-only user</h2>
+            <form onSubmit={handleAddReadOnlyUser}>
+                <label className="block mb-2">
+                    User
+                    <Select
+                            options={employees}
+                            value={selectedEmployee}
+                            onChange={(selectedOption)=>setSelectedEmployee(selectedOption)}
+                            isSearchable
+                            placeholder="Select an employee"
+                            className="w-full"
+                        />
+                </label>
+                <div className="flex justify-end">
+                    <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 mr-2">Add Read-only User</button>
+                    <button type="button" onClick={() => setShowAddReadOnlyUserForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+)}
+{showSuccessMessage && (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 className="text-xl font-bold mb-4">User added successfully</h2>
         </div>
     </div>
 )}
