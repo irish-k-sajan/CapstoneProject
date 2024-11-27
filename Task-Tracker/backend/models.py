@@ -2,12 +2,9 @@ from sqlalchemy import Boolean, Column, Integer, String, Date, ForeignKey, Prima
 from database import Base
 from sqlalchemy.orm import relationship
 import uuid
-
-def generate_uuid():
-    return str(uuid.uuid4())
 class Project(Base):
     __tablename__ = 'projects'
-    project_id = Column(String(50), primary_key=True,index=True, default= generate_uuid())
+    project_id = Column(String(50), primary_key=True,index=True, default= lambda: str(uuid.uuid4()))
     project_name = Column(String(32), nullable=False)
     project_description = Column(String(150))
     start_date = Column(Date, nullable=False)
@@ -20,7 +17,7 @@ class Project(Base):
 
 class Task(Base):
     __tablename__ = 'tasks'
-    task_id = Column(String(50), primary_key=True,index=True, default= generate_uuid())
+    task_id = Column(String(50), primary_key=True,index=True, default=lambda: str(uuid.uuid4()))
     task_name = Column(String(32), nullable=False)
     task_description = Column(String(150))
     task_status = Column(String(25), nullable=False)

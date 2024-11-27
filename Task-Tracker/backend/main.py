@@ -96,7 +96,7 @@ async def create_users(emp:EmployeeBase,db: db_dependency):
 
 
 @app.get('/projects/{project_id}',status_code=status.HTTP_200_OK)
-async def read_project(project_id:UUID, db:db_dependency):
+async def read_project(project_id:str, db:db_dependency):
     project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
     if project is None:
         raise HTTPException(status_code=404,detail='Project not found')
