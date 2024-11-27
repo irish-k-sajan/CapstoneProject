@@ -186,3 +186,8 @@ async def admin(db:db_dependency):
     if admins is None:
         raise HTTPException(status_code=404,detail="No projects")
     return admins
+    @app.get('/user-role/{user_id}/{project_id}',status_code=status.HTTP_200_OK)
+async def get_user_role_project(user_id:str,project_id:str,db:db_dependency):
+    user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id,
+    models.UserRole.project_id==project_id).first()
+    return user.role_id
