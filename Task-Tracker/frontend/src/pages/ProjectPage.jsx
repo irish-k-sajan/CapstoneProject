@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Logout from '../components/Logout.jsx';
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -10,7 +11,7 @@ const ProjectPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
-  const [taskId, setTaskId] = useState('');
+  // const [taskId, setTaskId] = useState('');
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [taskStatus, setTaskStatus] = useState('new');
@@ -54,6 +55,7 @@ const ProjectPage = () => {
       try {
         const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}`);
         const tasksResponse = await axios.get('http://localhost:8000/tasks');
+        // console.log(tasksResponse)
         const projectTasks = tasksResponse.data.filter(task => task.project_id === parseInt(projectId));
         setProject(projectResponse.data);
         setTasks(projectTasks);
@@ -69,7 +71,7 @@ const ProjectPage = () => {
 
   const handleDelete = async () => {
     try {
-      const tasksResponse = await axios.get('http://localhost:8000/tasks');
+      const tasksResponse = await axios.get('http://localhost:8000/tasks/');
       const projectTasks = tasksResponse.data.filter(task => task.project_id === parseInt(projectId));
 
       for (const task of projectTasks) {
@@ -90,7 +92,7 @@ const ProjectPage = () => {
   const handleAddTask = async (e) => {
     e.preventDefault();
     const newTask = {
-      task_id: taskId,
+      // task_id:taskId,
       task_name: taskName,
       task_description: taskDescription,
       task_status: taskStatus,
@@ -103,7 +105,7 @@ const ProjectPage = () => {
       await axios.post('http://localhost:8000/create-task/', newTask);
       setTasks([...tasks, newTask]);
       setShowTaskForm(false);
-      setTaskId('');
+      // setTaskId('');
       setTaskName('');
       setTaskDescription('');
       setTaskStatus('new');
@@ -121,6 +123,7 @@ const ProjectPage = () => {
   return (
     <div className="min-h-screen p-4 bg-gradient-to-b from-orange-500 to-gray-100 ">
       <h1 className="text-3xl font-bold mb-4">{project.project_name}</h1>
+      <Logout/>
       <p className="text-gray-700 mb-4">{project.project_description}</p>
       <p className="text-gray-700"><strong>Start Date:</strong> {new Date(project.start_date).toLocaleDateString()}</p>
       <p className="text-gray-700"><strong>End Date:</strong> {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</p>
@@ -181,7 +184,7 @@ const ProjectPage = () => {
             <h2 className="text-2xl font-semibold mb-4">Add New Task</h2>
             <form onSubmit={handleAddTask}>
               <div className="mb-4">
-                
+
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700">Task Name</label>
