@@ -6,7 +6,6 @@ from datetime import date
 from typing import  Annotated, Optional
 from database import engine,SessionLocal
 from sqlalchemy.orm import Session
-from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -153,7 +152,7 @@ async def create_role(role:RoleBase,db:db_dependency):
     db.commit()
 @app.post('/create-user-role',status_code=status.HTTP_201_CREATED)
 async def create_user_role(user_role:UserRoleBase,db:db_dependency):
-    db_role=models.Role(**user_role.dict())
+    db_role=models.UserRole(**user_role.dict())
     db.add(db_role)
     db.commit()
 @app.put('/update-user-role/{user_role_id}',status_code=status.HTTP_202_ACCEPTED)
