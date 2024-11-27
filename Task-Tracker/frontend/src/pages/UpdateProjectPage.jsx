@@ -7,7 +7,6 @@ const UpdateProjectPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { project } = location.state || {};
-
   const [projectName, setProjectName] = useState(project?.project_name || '');
   const [projectDescription, setProjectDescription] = useState(project?.project_description || '');
   const [startDate, setStartDate] = useState(project?.start_date || '');

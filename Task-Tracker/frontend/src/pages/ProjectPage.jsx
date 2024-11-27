@@ -11,7 +11,7 @@ const ProjectPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
-  // const [taskId, setTaskId] = useState('');
+  const [taskId, setTaskId] = useState('');
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [taskStatus, setTaskStatus] = useState('new');
@@ -56,7 +56,7 @@ const ProjectPage = () => {
         const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}`);
         const tasksResponse = await axios.get('http://localhost:8000/tasks');
         // console.log(tasksResponse)
-        const projectTasks = tasksResponse.data.filter(task => task.project_id === parseInt(projectId));
+        const projectTasks = tasksResponse.data.filter(task => task.project_id === projectId);
         setProject(projectResponse.data);
         setTasks(projectTasks);
       } catch (err) {
@@ -67,12 +67,12 @@ const ProjectPage = () => {
     };
 
     getProjectData();
-  }, [projectId]);
+  }, [projectId,tasks]);
 
   const handleDelete = async () => {
     try {
       const tasksResponse = await axios.get('http://localhost:8000/tasks/');
-      const projectTasks = tasksResponse.data.filter(task => task.project_id === parseInt(projectId));
+      const projectTasks = tasksResponse.data.filter(task => task.project_id === projectId);
 
       for (const task of projectTasks) {
         await axios.delete(`http://localhost:8000/tasks/${task.task_id}`);
@@ -98,19 +98,21 @@ const ProjectPage = () => {
       task_status: taskStatus,
       task_owner_id: taskOwnerId,
       due_date: dueDate,
-      project_id: parseInt(projectId),
+      project_id: projectId,
     };
+    console.log(projectId)
 
     try {
       await axios.post('http://localhost:8000/create-task/', newTask);
-      setTasks([...tasks, newTask]);
+      setTasks([...tasks,newTask])
       setShowTaskForm(false);
-      // setTaskId('');
+      //setTaskId(response.data.task_id);
       setTaskName('');
       setTaskDescription('');
       setTaskStatus('new');
       setTaskOwnerId('');
       setDueDate('');
+      
     } catch (err) {
       console.error('Failed to add task', err);
     }
@@ -169,6 +171,7 @@ const ProjectPage = () => {
                   <button onClick={() => openUpdateForm(task)} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Update Task</button>
                   <button onClick={async () => {
                       try {
+                          console.log(`Deleting task with ID: ${task.task_id}`);
                           await axios.delete(`http://localhost:8000/tasks/${task.task_id}`);
                           setTasks(tasks.filter(t => t.task_id !== task.task_id));
                       } catch (err) {

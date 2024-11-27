@@ -110,14 +110,14 @@ async def read_task(task_id: UUID, db:db_dependency):
         raise HTTPException(status_code=404,detail="Task not found")
     return task
 @app.delete('/tasks/{task_id}',status_code=status.HTTP_200_OK)
-async def delete_task(task_id: UUID, db:db_dependency):
+async def delete_task(task_id: str, db:db_dependency):
     task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
     if task is None:
         raise HTTPException(status_code=404,detail="Task not found")
     db.delete(task)
     db.commit()
 @app.delete('/projects/{project_id}',status_code=status.HTTP_200_OK)
-async def delete_project(project_id: UUID, db:db_dependency):
+async def delete_project(project_id: str, db:db_dependency):
     project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
     if project is None:
         raise HTTPException(status_code=404,detail="Project not found")
@@ -136,13 +136,13 @@ async def get_tasks(db:db_dependency):
         raise HTTPException(status_code=404,detail="No projects")
     return tasks
 @app.put('/update-project/{project_id}',status_code=status.HTTP_202_ACCEPTED)
-async def update_project(project_id: UUID,project: UpdateProjectBase,db: db_dependency):
+async def update_project(project_id: str,project: UpdateProjectBase,db: db_dependency):
     db_project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
     for key, value in project.model_dump(exclude_unset=True).items():
         setattr(db_project, key, value)
     db.commit()
 @app.put('/update-task/{task_id}',status_code=status.HTTP_202_ACCEPTED)
-async def update_task(task_id: UUID,task: UpdateTaskBase,db: db_dependency):
+async def update_task(task_id: str,task: UpdateTaskBase,db: db_dependency):
     db_task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
     for key, value in task.model_dump(exclude_unset=True).items():
         setattr(db_task, key, value)
