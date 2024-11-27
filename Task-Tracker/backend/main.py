@@ -62,6 +62,8 @@ class UpdateUserRoleBase(BaseModel):
     employee_id:Optional[str]=None
 class AdminBase(BaseModel):
     employee_id:str
+class AdminBase(BaseModel):
+    employee_id:str
     
 def get_db():
     db=SessionLocal()
