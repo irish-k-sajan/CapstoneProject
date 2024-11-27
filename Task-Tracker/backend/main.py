@@ -162,7 +162,7 @@ async def create_user_role(user_role:UserRoleBase,db:db_dependency):
     exist_user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_role.employee_id,
     models.UserRole.project_id==user_role.project_id).first()
     if exist_user:
-        raise HTTPException(status_code=409,detail="User already exists")
+        return {"detail":"User already exists"}
     db_role=models.UserRole(**user_role.dict())
     db.add(db_role)
     db.commit()
