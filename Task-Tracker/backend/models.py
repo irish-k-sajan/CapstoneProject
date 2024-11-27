@@ -2,12 +2,9 @@ from sqlalchemy import Boolean, Column, Integer, String, Date, ForeignKey, Prima
 from database import Base
 from sqlalchemy.orm import relationship
 import uuid
-
-def generate_uuid():
-    return str(uuid.uuid4())
 class Project(Base):
     __tablename__ = 'projects'
-    project_id = Column(String(50), primary_key=True,index=True, default= generate_uuid())
+    project_id = Column(String(50), primary_key=True,index=True, default= lambda: str(uuid.uuid4()))
     project_name = Column(String(32), nullable=False)
     project_description = Column(String(150))
     start_date = Column(Date, nullable=False)
@@ -20,7 +17,7 @@ class Project(Base):
 
 class Task(Base):
     __tablename__ = 'tasks'
-    task_id = Column(String(50), primary_key=True,index=True, default= generate_uuid())
+    task_id = Column(String(50), primary_key=True,index=True, default=lambda: str(uuid.uuid4()))
     task_name = Column(String(32), nullable=False)
     task_description = Column(String(150))
     task_status = Column(String(25), nullable=False)
@@ -39,6 +36,7 @@ class Employee(Base):
     projects = relationship("Project", back_populates="owner")
     tasks = relationship("Task", back_populates="task_owner")
     emp_user=relationship("UserRole",back_populates="user_emp")
+    emp_admin=relationship("Admin",back_populates="admin_emp")
 class Role(Base):
     __tablename__='role'
     role_id=Column(Integer,primary_key=True,autoincrement=True)
@@ -54,5 +52,11 @@ class UserRole(Base):
     project_user=relationship("Project",back_populates="user_project")
     user_emp=relationship("Employee",back_populates="emp_user")
     role_user=relationship("Role",back_populates="user_role")
+class Admin(Base):
+    __tablename__='admin_users'
+    admin_id=Column(Integer,primary_key=True,autoincrement=True)
+    employee_id=Column(String(50), ForeignKey('employees.employee_id'),nullable=False)
+    admin_emp=relationship("Employee",back_populates="emp_admin")
+
 
 
