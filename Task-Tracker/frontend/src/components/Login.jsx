@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { GoogleLogin } from 'react-google-login'
 import { useNavigate } from 'react-router-dom';
 
@@ -5,12 +6,32 @@ const clientId = "714826473195-mkbur5p2vel0mtc8o8suvr94rdni8n4g.apps.googleuserc
 
 export default function Login() {
     const navigate=useNavigate()
-    function onSuccess(res) {
+    const onSuccess = async (res) => {
         console.log("SUCCESS:", res.profileObj);
-        console.log(res.profileObj.email)
-        navigate('/dashboard');
-
-    }
+        localStorage.setItem("user-details",JSON.stringify(res));
+        try {
+            const response = await axios.get('http://localhost:8000/user');
+            const users = response.data;
+            const userExists = users.find(user => user.employee_id === res.profileObj.googleId);
+    
+            if (userExists) {
+                console.log('User exists, logging in...');
+                navigate('/dashboard');
+            } else {
+                const newUser = {
+                    employee_id: res.profileObj.googleId,
+                    employee_name: res.profileObj.givenName,
+                    employee_email: res.profileObj.email,
+                };
+    
+                await axios.post('http://localhost:8000/create-user/', newUser);
+                console.log('New user added to the database');
+                navigate('/dashboard');
+            }
+        } catch (err) {
+            console.error('Error during user authentication', err);
+        }
+    };
     function onFailure(res) {
         console.log("Failure");
         navigate('/login-unsuccessful');

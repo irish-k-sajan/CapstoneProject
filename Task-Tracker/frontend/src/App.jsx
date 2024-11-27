@@ -10,6 +10,7 @@ import { gapi } from 'gapi-script';
 import Login from './components/Login.jsx';
 import Logout from './components/Logout.jsx';
 import LoginUnsuccessful from './pages/LoginUnsuccessful.jsx';
+import UserPage from './pages/UserPage.jsx';
 
 const clientId="714826473195-mkbur5p2vel0mtc8o8suvr94rdni8n4g.apps.googleusercontent.com";
 
@@ -28,6 +29,7 @@ const App = () => {
     <Router>
         <Routes>
           <Route path="/dashboard" element={<Dashboard/>} />
+          <Route path="/users" element={<UserPage/>} />
           <Route path="/projects" element={<ProjectsListPage/>} />
           <Route path="/projects/:projectId" element={<ProjectPage/>} />
           <Route path="/add-project" element={<ProjectFormPage/>} />

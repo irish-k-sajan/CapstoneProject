@@ -8,7 +8,8 @@ const ProjectFormPage = ({ onAddProject }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const navigate = useNavigate();
-
+  const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
+  const admin=(userId==="107192922926771105227");
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newProject = {
@@ -29,8 +30,9 @@ const ProjectFormPage = ({ onAddProject }) => {
   };
 
   return (
+
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-500 to-gray-100 p-4">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-full max-w-md">
+      {admin?<form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-full max-w-md">
         <h2 className="text-2xl font-semibold mb-4">Add New Project</h2>
         
         <div className="mb-4">
@@ -77,7 +79,7 @@ const ProjectFormPage = ({ onAddProject }) => {
         <Link to="http://localhost:5173/projects" className="bg-white text-blue-500 mx-5">
           Cancel
         </Link>        
-      </form>
+      </form>:<h1>You are not an admin</h1>}
     </div>
   );
 };

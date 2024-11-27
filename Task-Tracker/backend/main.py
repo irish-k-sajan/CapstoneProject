@@ -6,8 +6,6 @@ from datetime import date
 from typing import  Annotated, Optional
 from database import engine,SessionLocal
 from sqlalchemy.orm import Session
-from fastapi.middleware.cors import CORSMiddleware
-from uuid import UUID
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -36,7 +34,7 @@ class TaskBase(BaseModel):
     task_status :str
     task_owner_id: str
     due_date: date
-    project_id: UUID
+    project_id: str
 
 class UpdateTaskBase(BaseModel):
     task_name: Optional[str]=None
@@ -44,7 +42,7 @@ class UpdateTaskBase(BaseModel):
     task_status :Optional[str]=None
     task_owner_id: Optional[str]=None
     due_date: Optional[date]=None
-    project_id: Optional[UUID]=None
+    project_id: Optional[str]=None
 class EmployeeBase(BaseModel):
     employee_id : str
     employee_name :str
@@ -54,11 +52,11 @@ class RoleBase(BaseModel):
     role_name:str
 class UserRoleBase(BaseModel):
     role_id:int
-    project_id:UUID
+    project_id:str
     employee_id:str
 class UpdateUserRoleBase(BaseModel):
     role_id:Optional[int]=None
-    project_id:Optional[UUID]=None
+    project_id:Optional[str]=None
     employee_id:Optional[str]=None
 class AdminBase(BaseModel):
     employee_id:str
@@ -103,8 +101,14 @@ async def read_project(project_id:str, db:db_dependency):
     if project is None:
         raise HTTPException(status_code=404,detail='Project not found')
     return project
+@app.get('/user-role/{user_id}',status_code=status.HTTP_200_OK)
+async def read_user_role(user_id:str, db:db_dependency):
+    projects=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id).all()
+    if projects is None:
+        raise HTTPException(status_code=404,detail='Projects not found')
+    return projects
 @app.get('/tasks/{task_id}',status_code=status.HTTP_200_OK)
-async def read_task(task_id: UUID, db:db_dependency):
+async def read_task(task_id: str, db:db_dependency):
     task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
     if task is None:
         raise HTTPException(status_code=404,detail="Task not found")
@@ -154,7 +158,7 @@ async def create_role(role:RoleBase,db:db_dependency):
     db.commit()
 @app.post('/create-user-role',status_code=status.HTTP_201_CREATED)
 async def create_user_role(user_role:UserRoleBase,db:db_dependency):
-    db_role=models.Role(**user_role.dict())
+    db_role=models.UserRole(**user_role.dict())
     db.add(db_role)
     db.commit()
 @app.put('/update-user-role/{user_role_id}',status_code=status.HTTP_202_ACCEPTED)
