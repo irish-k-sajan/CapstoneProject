@@ -7,7 +7,6 @@ from typing import  Annotated, Optional
 from database import engine,SessionLocal
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
-from uuid import UUID
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -36,7 +35,7 @@ class TaskBase(BaseModel):
     task_status :str
     task_owner_id: str
     due_date: date
-    project_id: UUID
+    project_id: str
 
 class UpdateTaskBase(BaseModel):
     task_name: Optional[str]=None
@@ -44,7 +43,7 @@ class UpdateTaskBase(BaseModel):
     task_status :Optional[str]=None
     task_owner_id: Optional[str]=None
     due_date: Optional[date]=None
-    project_id: Optional[UUID]=None
+    project_id: Optional[str]=None
 class EmployeeBase(BaseModel):
     employee_id : str
     employee_name :str
@@ -54,11 +53,11 @@ class RoleBase(BaseModel):
     role_name:str
 class UserRoleBase(BaseModel):
     role_id:int
-    project_id:UUID
+    project_id:str
     employee_id:str
 class UpdateUserRoleBase(BaseModel):
     role_id:Optional[int]=None
-    project_id:Optional[UUID]=None
+    project_id:Optional[str]=None
     employee_id:Optional[str]=None
 class AdminBase(BaseModel):
     employee_id:str
@@ -104,20 +103,20 @@ async def read_project(project_id:str, db:db_dependency):
         raise HTTPException(status_code=404,detail='Project not found')
     return project
 @app.get('/tasks/{task_id}',status_code=status.HTTP_200_OK)
-async def read_task(task_id: UUID, db:db_dependency):
+async def read_task(task_id: str, db:db_dependency):
     task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
     if task is None:
         raise HTTPException(status_code=404,detail="Task not found")
     return task
 @app.delete('/tasks/{task_id}',status_code=status.HTTP_200_OK)
-async def delete_task(task_id: UUID, db:db_dependency):
+async def delete_task(task_id: str, db:db_dependency):
     task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
     if task is None:
         raise HTTPException(status_code=404,detail="Task not found")
     db.delete(task)
     db.commit()
 @app.delete('/projects/{project_id}',status_code=status.HTTP_200_OK)
-async def delete_project(project_id: UUID, db:db_dependency):
+async def delete_project(project_id: str, db:db_dependency):
     project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
     if project is None:
         raise HTTPException(status_code=404,detail="Project not found")
@@ -136,13 +135,13 @@ async def get_tasks(db:db_dependency):
         raise HTTPException(status_code=404,detail="No projects")
     return tasks
 @app.put('/update-project/{project_id}',status_code=status.HTTP_202_ACCEPTED)
-async def update_project(project_id: UUID,project: UpdateProjectBase,db: db_dependency):
+async def update_project(project_id: str,project: UpdateProjectBase,db: db_dependency):
     db_project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
     for key, value in project.model_dump(exclude_unset=True).items():
         setattr(db_project, key, value)
     db.commit()
 @app.put('/update-task/{task_id}',status_code=status.HTTP_202_ACCEPTED)
-async def update_task(task_id: UUID,task: UpdateTaskBase,db: db_dependency):
+async def update_task(task_id: str,task: UpdateTaskBase,db: db_dependency):
     db_task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
     for key, value in task.model_dump(exclude_unset=True).items():
         setattr(db_task, key, value)
