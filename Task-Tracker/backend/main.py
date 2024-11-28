@@ -85,18 +85,34 @@ async def create_project( user_id: str,project:ProjectBase,db: db_dependency):
         db.commit()
     else:
         raise HTTPException(403, detail="Access Denied")
-@app.post("/create-task/",status_code=status.HTTP_201_CREATED)
-async def create_task(task: TaskBase,db:db_dependency):
-    db_task=models.Task(**task.dict())
-    db.add(db_task)
-    db.commit()
-@app.get("/user",status_code=status.HTTP_200_OK)
-async def get_user(db:db_dependency):
-    users=db.query(models.Employee).all()
-    if users is None:
-        raise HTTPException(status_code=404,detail="No projects")
-    return users
-    
+@app.get('/user-role/{user_id}/{project_id}',status_code=status.HTTP_200_OK)
+async def get_user_role_project(user_id:str,project_id:str,db:db_dependency):
+    user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id,
+    models.UserRole.project_id==project_id).first()
+    return user.role_id
+
+@app.post("/create-task/{project_id}/{user_id}",status_code=status.HTTP_201_CREATED)
+async def create_task(project_id:str,user_id:str,task: TaskBase,db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    task_creator=get_user_role_project(user_id,project_id,db)
+    if admin or task_creator==2:
+            db_task=models.Task(**task.dict())
+            db.add(db_task)
+            db.commit()
+    else:
+        raise HTTPException(403, detail="Access Denied")
+
+@app.get("/user/{user_id}",status_code=status.HTTP_200_OK)
+async def get_user(user_id:str,db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    if admin:
+        users=db.query(models.Employee).all()
+        if users is None:
+            raise HTTPException(status_code=404,detail="No projects")
+        return users
+    else:
+        raise HTTPException(403, detail="Access Denied")
+
 
 @app.post("/create-user/",status_code=status.HTTP_201_CREATED)
 async def create_users(emp:EmployeeBase,db: db_dependency):
@@ -105,12 +121,18 @@ async def create_users(emp:EmployeeBase,db: db_dependency):
     db.commit()
 
 
-@app.get('/projects/{project_id}',status_code=status.HTTP_200_OK)
-async def read_project(project_id:str, db:db_dependency):
-    project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
-    if project is None:
-        raise HTTPException(status_code=404,detail='Project not found')
-    return project
+@app.get('/projects/{project_id}/{user_id}',status_code=status.HTTP_200_OK)
+async def read_project(user_id:str,project_id:str, db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    user_role=get_user_role_project(user_id,project_id)
+    if admin or user_role:
+            
+        project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
+        if project is None:
+            raise HTTPException(status_code=404,detail='Project not found')
+        return project
+    else:
+        raise HTTPException(403, detail="Access Denied")
 @app.get('/user-role/{user_id}',status_code=status.HTTP_200_OK)
 async def read_user_role(user_id:str, db:db_dependency):
     projects=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id).all()
@@ -123,38 +145,59 @@ async def read_task(task_id: str, db:db_dependency):
     if task is None:
         raise HTTPException(status_code=404,detail="Task not found")
     return task
-@app.delete('/tasks/{task_id}',status_code=status.HTTP_200_OK)
-async def delete_task(task_id: str, db:db_dependency):
-    task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
-    if task is None:
-        raise HTTPException(status_code=404,detail="Task not found")
-    db.delete(task)
-    db.commit()
-@app.delete('/projects/{project_id}',status_code=status.HTTP_200_OK)
-async def delete_project(project_id: str, db:db_dependency):
-    project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
-    if project is None:
-        raise HTTPException(status_code=404,detail="Project not found")
-    db.delete(project)
-    db.commit()
-@app.get('/projects',status_code=status.HTTP_200_OK)
-async def get_projects(db:db_dependency):
-    projects=db.query(models.Project).all()
+@app.delete('/tasks/{task_id}/{user_id}',status_code=status.HTTP_200_OK)
+async def delete_task(user_id: str, task_id: str, db:db_dependency):
+    user_role=get_user_role_project(user_id,task_id)
+    admin=check_admin_id(user_id,db)
+    if admin or user_role==2:
+        task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
+        if task is None:
+            raise HTTPException(status_code=404,detail="Task not found")
+        db.delete(task)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403,detail="Access Denied")
+@app.delete('/projects/{project_id}/{user_id}',status_code=status.HTTP_200_OK)
+async def delete_project(user_id,project_id: str, db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    if admin:
+        project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
+        if project is None:
+            raise HTTPException(status_code=404,detail="Project not found")
+        db.delete(project)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403,detail="Access Denied")
+@app.get('/projects/{user_id}',status_code=status.HTTP_200_OK)
+async def get_projects(user_id:str, db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    projects=[]
+    if admin:
+        projects=db.query(models.Project).all()
+    else:
+        project=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id)
+        project_ids=[i.project_id for i in project]
+        for i in project_ids:
+            projects.append(db.query(models.Project).filter(models.Project.project_id==i).first())
     if projects is None:
         raise HTTPException(status_code=404,detail="No projects")
     return projects
-@app.get('/tasks',status_code=status.HTTP_200_OK)
-async def get_tasks(db:db_dependency):
+@app.get('/{project_id}/tasks/',status_code=status.HTTP_200_OK)
+async def get_tasks(project_id: str ,db:db_dependency):
     tasks=db.query(models.Task).all()
     if tasks is None:
         raise HTTPException(status_code=404,detail="No projects")
     return tasks
-@app.put('/update-project/{project_id}',status_code=status.HTTP_202_ACCEPTED)
-async def update_project(project_id: str,project: UpdateProjectBase,db: db_dependency):
-    db_project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
-    for key, value in project.model_dump(exclude_unset=True).items():
-        setattr(db_project, key, value)
-    db.commit()
+@app.put('/update-project/{project_id}/{user_id}',status_code=status.HTTP_202_ACCEPTED)
+async def update_project(project_id: str,user_id: str,project: UpdateProjectBase,db: db_dependency):
+    admin=check_admin_id(user_id,db)
+    if admin:
+        db_project=db.query(models.Project).filter(models.Project.project_id==project_id).first()
+        for key, value in project.model_dump(exclude_unset=True).items():
+            setattr(db_project, key, value)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403,detail="Access Denied")
 @app.put('/update-task/{task_id}',status_code=status.HTTP_202_ACCEPTED)
 async def update_task(task_id: str,task: UpdateTaskBase,db: db_dependency):
     db_task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
@@ -189,17 +232,6 @@ async def delete_user_role(user_role_id: int, db:db_dependency):
         raise HTTPException(status_code=404,detail="Project not found")
     db.delete(db_user_role)
     db.commit()
-@app.get('/admin',status_code=status.HTTP_200_OK)
-async def admin(db:db_dependency):
-    admins=db.query(models.Admin).all()
-    if admins is None:
-        raise HTTPException(status_code=404,detail="No projects")
-    return admins
-@app.get('/user-role/{user_id}/{project_id}',status_code=status.HTTP_200_OK)
-async def get_user_role_project(user_id:str,project_id:str,db:db_dependency):
-    user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id,
-    models.UserRole.project_id==project_id).first()
-    return user.role_id
 @app.get('/is_admin/{user_id}', status_code=status.HTTP_200_OK)
 async def check_admin(user_id:str,db:db_dependency):
     is_admin=check_admin_id(user_id,db)
