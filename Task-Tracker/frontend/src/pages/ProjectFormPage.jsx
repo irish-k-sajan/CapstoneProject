@@ -30,7 +30,6 @@ const ProjectFormPage = ({ onAddProject }) => {
   };
 
   return (
-
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-500 to-gray-100 p-4">
       {admin?<form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow w-full max-w-md">
         <h2 className="text-2xl font-semibold mb-4">Add New Project</h2>
@@ -81,6 +80,7 @@ const ProjectFormPage = ({ onAddProject }) => {
         </Link>        
       </form>:<h1>You are not an admin</h1>}
     </div>
+    
   );
 };
 
