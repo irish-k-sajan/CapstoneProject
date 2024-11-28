@@ -101,7 +101,6 @@ def check_admin_id(user_id: str, db: db_dependency):
         return True
     return False
 
-
 def get_user_role_project_internal(user_id: str, project_id: str, db: db_dependency):
     user = db.query(models.UserRole).filter(models.UserRole.employee_id == user_id,
                                             models.UserRole.project_id == project_id).first()
@@ -115,6 +114,7 @@ def get_user_role_project_internal(user_id: str, project_id: str, db: db_depende
 async def create_project(user_id: str, project: ProjectBase, db: db_dependency):
     if check_admin_id(user_id, db):
         db_project = models.Project(**project.dict())
+
         db.add(db_project)
         db.commit()
     else:
@@ -146,6 +146,7 @@ async def create_task(project_id: str, user_id: str, task: TaskBase, db: db_depe
 @app.get("/user/{user_id}", status_code=status.HTTP_200_OK)
 async def get_user(user_id: str, db: db_dependency):
     users = db.query(models.Employee).all()
+
     if users is None:
         raise HTTPException(status_code=404, detail="No projects")
     return users
