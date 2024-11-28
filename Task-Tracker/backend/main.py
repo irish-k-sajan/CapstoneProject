@@ -76,11 +76,15 @@ def check_admin_id(user_id:str,db:db_dependency):
     if is_admin:
         return True
     return False
-@app.post("/create-project/",status_code=status.HTTP_201_CREATED)
-async def create_project(project:ProjectBase,db: db_dependency):
-    db_project=models.Project(**project.dict())
-    db.add(db_project)
-    db.commit()
+
+@app.post("/create-project/{user_id}",status_code=status.HTTP_201_CREATED)
+async def create_project( user_id: str,project:ProjectBase,db: db_dependency):
+    if check_admin_id(user_id,db):
+        db_project=models.Project(**project.dict())
+        db.add(db_project)
+        db.commit()
+    else:
+        raise HTTPException(403, detail="Access Denied")
 @app.post("/create-task/",status_code=status.HTTP_201_CREATED)
 async def create_task(task: TaskBase,db:db_dependency):
     db_task=models.Task(**task.dict())
