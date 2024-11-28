@@ -143,11 +143,16 @@ async def get_user(user_id: str, db: db_dependency):
         raise HTTPException(403, detail="Access Denied")
 
 
-@app.post("/create-user/", status_code=status.HTTP_201_CREATED)
-async def create_users(emp: EmployeeBase, db: db_dependency):
-    db_emp = models.Employee(**emp.dict())
-    db.add(db_emp)
-    db.commit()
+@app.post("/create-user/{user_id}", status_code=status.HTTP_201_CREATED)
+async def create_users(user_id: str, emp: EmployeeBase, db: db_dependency):
+    user_exists = db.query(models.Employee).filter(
+        models.Employee.employee_id == user_id).first()
+    if user_exists:
+        db_emp = models.Employee(**emp.dict())
+        db.add(db_emp)
+        db.commit()
+    else:
+        return {"detail": "User Already Exists"}
 
 
 @app.get('/projects/{project_id}/{user_id}', status_code=status.HTTP_200_OK)
