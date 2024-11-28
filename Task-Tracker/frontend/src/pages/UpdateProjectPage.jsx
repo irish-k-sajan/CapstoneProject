@@ -22,7 +22,7 @@ const UpdateProjectPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.put(`http://localhost:8000/update-project/${projectId}`, {
+      await axios.put(`http://localhost:8000/update-project/${projectId}/${userId}`, {
         project_name: projectName,
         project_description: projectDescription,
         start_date: startDate,

@@ -8,7 +8,7 @@ const UserPage = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/user');
+                const response = await axios.get(`http://localhost:8000/user/${userId}`);
                 setUsers(response.data);
             } catch (err) {
                 console.error('Failed to fetch users', err);
