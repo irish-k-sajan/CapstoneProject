@@ -198,40 +198,64 @@ async def update_project(project_id: str,user_id: str,project: UpdateProjectBase
         db.commit()
     else:
         raise HTTPException(status_code=403,detail="Access Denied")
-@app.put('/update-task/{task_id}',status_code=status.HTTP_202_ACCEPTED)
-async def update_task(task_id: str,task: UpdateTaskBase,db: db_dependency):
-    db_task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
-    for key, value in task.model_dump(exclude_unset=True).items():
-        setattr(db_task, key, value)
-    db.commit()
-@app.post('/create-role',status_code=status.HTTP_201_CREATED)
-async def create_role(role:RoleBase,db:db_dependency):
-    db_role=models.Role(**role.dict())
-    db.add(db_role)
-    db.commit()
-@app.post('/create-user-role',status_code=status.HTTP_201_CREATED)
-async def create_user_role(user_role:UserRoleBase,db:db_dependency):
-    exist_user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_role.employee_id,
-    models.UserRole.project_id==user_role.project_id).first()
-    if exist_user:
-        return {"detail":"User already exists"}
-    db_role=models.UserRole(**user_role.dict())
-    db.add(db_role)
-    db.commit()
-    return {"detail":"Success"}
-@app.put('/update-user-role/{user_role_id}',status_code=status.HTTP_202_ACCEPTED)
-async def update_user_role(user_role_id: int,user_role: UpdateUserRoleBase,db:db_dependency):
-    db_user_role=db.query(models.UserRole).filter(models.UserRole.user_role_id==user_role_id).first()
-    for key, value in user_role.model_dump(exclude_unset=True).items():
-        setattr(db_user_role, key, value)
-    db.commit()
-@app.delete('/delete-user-role/{user_role_id}', status_code=status.HTTP_200_OK)
-async def delete_user_role(user_role_id: int, db:db_dependency):
-    db_user_role=db.query(models.UserRole).filter(models.UserRole.user_role_id==user_role_id).first()
-    if db_user_role is None:
-        raise HTTPException(status_code=404,detail="Project not found")
-    db.delete(db_user_role)
-    db.commit()
+@app.put('/update-task/{task_id}/{user_id}/{project_id}',status_code=status.HTTP_202_ACCEPTED)
+async def update_task(task_id: str,user_id: str,project_id:str,task: UpdateTaskBase,db: db_dependency):
+    admin=check_admin_id(user_id,db)
+    user_role=get_user_role_project(user_id,project_id)
+    if admin or user_role==2:
+
+        db_task=db.query(models.Task).filter(models.Task.task_id==task_id).first()
+        for key, value in task.model_dump(exclude_unset=True).items():
+            setattr(db_task, key, value)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403,detail="Access Denied")
+@app.post('/create-role/{user_id}',status_code=status.HTTP_201_CREATED)
+async def create_role(user_id:str,role:RoleBase,db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    if admin:
+        db_role=models.Role(**role.dict())
+        db.add(db_role)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403,detail='Access Denied')
+@app.post('/create-user-role/{user_id}',status_code=status.HTTP_201_CREATED)
+async def create_user_role(user_id:str,user_role:UserRoleBase,db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    if admin:
+        exist_user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_role.employee_id,
+        models.UserRole.project_id==user_role.project_id).first()
+        if exist_user:
+            return {"detail":"User already exists"}
+        db_role=models.UserRole(**user_role.dict())
+        db.add(db_role)
+        db.commit()
+        return {"detail":"Success"}
+    else:
+        raise HTTPException(status_code=403,detail="Access Denied")
+@app.put('/update-user-role/{user_role_id}/{user_id}',status_code=status.HTTP_202_ACCEPTED)
+async def update_user_role(user_id:str,user_role_id: int,user_role: UpdateUserRoleBase,db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    if admin:
+        db_user_role=db.query(models.UserRole).filter(models.UserRole.user_role_id==user_role_id).first()
+        for key, value in user_role.model_dump(exclude_unset=True).items():
+            setattr(db_user_role, key, value)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403,detail="Access Denied")
+        
+@app.delete('/delete-user-role/{user_role_id}/{user_id}', status_code=status.HTTP_200_OK)
+async def delete_user_role(user_id: str,user_role_id: int, db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    if admin:
+            
+        db_user_role=db.query(models.UserRole).filter(models.UserRole.user_role_id==user_role_id).first()
+        if db_user_role is None:
+            raise HTTPException(status_code=404,detail="Project not found")
+        db.delete(db_user_role)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403,detail="Access Denied")
 @app.get('/is_admin/{user_id}', status_code=status.HTTP_200_OK)
 async def check_admin(user_id:str,db:db_dependency):
     is_admin=check_admin_id(user_id,db)
