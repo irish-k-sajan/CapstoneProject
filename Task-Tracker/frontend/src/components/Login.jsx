@@ -13,6 +13,8 @@ export default function Login() {
             const response = await axios.get('http://localhost:8000/user');
             const users = response.data;
             const userExists = users.find(user => user.employee_id === res.profileObj.googleId);
+            const isAdmin=await axios.get(`http://localhost:8000/is_admin/${res.profileObj.googleId}`)
+            localStorage.setItem("is-admin",isAdmin.data)
     
             if (userExists) {
                 console.log('User exists, logging in...');

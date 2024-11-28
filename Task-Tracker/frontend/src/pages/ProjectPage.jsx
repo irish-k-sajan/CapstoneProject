@@ -28,7 +28,7 @@ const ProjectPage = () => {
   const [showAddReadOnlyUserForm,setShowAddReadOnlyUserForm]=useState(false);
   const [showSuccessMessage,setShowSuccessMessage]=useState(false)
   const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
-  const admin=(userId==="107192922926771105227");
+  const admin=(localStorage.getItem("is-admin")=="true");
   const [isTaskCreator,setIsTaskCreator]=useState(false);
 
   const openUpdateForm = (task) => {

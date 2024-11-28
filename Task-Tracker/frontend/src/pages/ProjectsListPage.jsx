@@ -10,7 +10,7 @@ const ProjectsListPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
-  const admin=(userId==="107192922926771105227");
+  const admin=(localStorage.getItem("is-admin")=="true");
   useEffect(() => {
     const getProjects = async () => {
       try {
