@@ -71,6 +71,11 @@ def get_db():
     finally:
         db.close()
 db_dependency=Annotated[Session,Depends(get_db)]
+def check_admin_id(user_id:str,db:db_dependency):
+    is_admin=db.query(models.Admin).filter(models.Admin.employee_id==user_id).first()
+    if is_admin:
+        return True
+    return False
 @app.post("/create-project/",status_code=status.HTTP_201_CREATED)
 async def create_project(project:ProjectBase,db: db_dependency):
     db_project=models.Project(**project.dict())
@@ -191,3 +196,7 @@ async def get_user_role_project(user_id:str,project_id:str,db:db_dependency):
     user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id,
     models.UserRole.project_id==project_id).first()
     return user.role_id
+@app.get('/is_admin/{user_id}', status_code=status.HTTP_200_OK)
+async def check_admin(user_id:str,db:db_dependency):
+    is_admin=check_admin_id(user_id,db)
+    return is_admin
