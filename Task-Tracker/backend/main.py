@@ -277,3 +277,22 @@ async def update_user_role(user_id:str,user_role_id: int,user_role: UpdateUserRo
 async def check_admin(user_id:str,db:db_dependency):
     is_admin=check_admin_id(user_id,db)
     return is_admin
+@app.get("/user/{role_id}/{user_id}/{project_id}", status_code=status.HTTP_200_OK)
+async def get_assigned_user(role_id: int,user_id: str,project_id: str, db: db_dependency):
+    admin = check_admin_id(user_id, db)
+    if admin:
+        users = db.query(models.UserRole).filter(models.UserRole.project_id==project_id).all()
+        if users is None:
+            raise HTTPException(status_code=404, detail="No projects")
+        Required_users=[]
+        if role_id==2:
+            for user in users:
+                if user.role_id==2:
+                    Required_users.append(user)
+        else:
+            for user in users:
+                if user.role_id==3:
+                    Required_users.append(user)
+        return Required_users
+    else:
+        raise HTTPException(403, detail="Access Denied")
