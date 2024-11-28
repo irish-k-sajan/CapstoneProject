@@ -3,7 +3,8 @@ import axios from 'axios';
 
 const UserPage = () => {
     const [users, setUsers] = useState([]);
-
+    const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
+    const admin=(userId==="107192922926771105227");
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -18,7 +19,8 @@ const UserPage = () => {
     }, []);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+        <div>
+        {admin ? <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
             <h1 className="text-4xl font-bold mb-4">User List</h1>
             <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -40,6 +42,7 @@ const UserPage = () => {
                     </tbody>
                 </table>
             </div>
+        </div>:<div><h1 className='text-4xl flex justify-center'>Access Denied</h1></div>}
         </div>
     );
 };

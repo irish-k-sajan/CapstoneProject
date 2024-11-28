@@ -13,6 +13,8 @@ const UpdateProjectPage = () => {
   const [endDate, setEndDate] = useState(project?.end_date || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
+  const admin=(userId==="107192922926771105227");
 
   const handleUpdate = async (e) => {
 
@@ -38,7 +40,8 @@ const UpdateProjectPage = () => {
   if (error) return <div className="text-center mt-4 text-red-500">Error: {error}</div>;
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div>
+    {admin ? <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Update Project</h1>
       <form onSubmit={handleUpdate} className="space-y-4">
         <div>
@@ -86,6 +89,7 @@ const UpdateProjectPage = () => {
           Update Project
         </button>
       </form>
+    </div>:<div><h1 className='text-4xl flex justify-center'>Access Denied</h1></div>}
     </div>
   );
 };

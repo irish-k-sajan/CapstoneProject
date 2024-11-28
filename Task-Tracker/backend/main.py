@@ -6,6 +6,7 @@ from datetime import date
 from typing import  Annotated, Optional
 from database import engine,SessionLocal
 from sqlalchemy.orm import Session
+import json
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -158,9 +159,14 @@ async def create_role(role:RoleBase,db:db_dependency):
     db.commit()
 @app.post('/create-user-role',status_code=status.HTTP_201_CREATED)
 async def create_user_role(user_role:UserRoleBase,db:db_dependency):
+    exist_user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_role.employee_id,
+    models.UserRole.project_id==user_role.project_id).first()
+    if exist_user:
+        return {"detail":"User already exists"}
     db_role=models.UserRole(**user_role.dict())
     db.add(db_role)
     db.commit()
+    return {"detail":"Success"}
 @app.put('/update-user-role/{user_role_id}',status_code=status.HTTP_202_ACCEPTED)
 async def update_user_role(user_role_id: int,user_role: UpdateUserRoleBase,db:db_dependency):
     db_user_role=db.query(models.UserRole).filter(models.UserRole.user_role_id==user_role_id).first()
@@ -180,3 +186,8 @@ async def admin(db:db_dependency):
     if admins is None:
         raise HTTPException(status_code=404,detail="No projects")
     return admins
+@app.get('/user-role/{user_id}/{project_id}',status_code=status.HTTP_200_OK)
+async def get_user_role_project(user_id:str,project_id:str,db:db_dependency):
+    user=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id,
+    models.UserRole.project_id==project_id).first()
+    return user.role_id
