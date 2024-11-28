@@ -27,7 +27,9 @@ const ProjectPage = () => {
   const [showAddTaskCreatorForm,setShowAddTaskCreatorForm]=useState(false);
   const [showAddReadOnlyUserForm,setShowAddReadOnlyUserForm]=useState(false);
   const [showSuccessMessage,setShowSuccessMessage]=useState(false)
-  const [notification, setNotification] = useState('');
+  const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
+  const admin=(userId==="107192922926771105227");
+  const [isTaskCreator,setIsTaskCreator]=useState(false);
 
   const openUpdateForm = (task) => {
     setCurrentTask(task);
@@ -65,6 +67,13 @@ const ProjectPage = () => {
         const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}`);
         const tasksResponse = await axios.get('http://localhost:8000/tasks');
         const employeeResponse = await axios.get('http://localhost:8000/user')
+        const roleResponse=await axios.get(`http://localhost:8000/user-role/${userId}/${projectId}`)
+        if(roleResponse.data==2){
+          setIsTaskCreator(true)
+        }
+        else{
+          setIsTaskCreator(false)
+        }
         const employeeOptions = employeeResponse.data.map(employee => ({
           value: employee.employee_id,
           label: `${employee.employee_name} (${employee.employee_email})`,
@@ -193,11 +202,11 @@ const ProjectPage = () => {
       <p className="text-gray-700"><strong>Start Date:</strong> {new Date(project.start_date).toLocaleDateString()}</p>
       <p className="text-gray-700"><strong>End Date:</strong> {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</p>
       <div className="flex space-x-4 mb-6 my-4">
-        <button onClick={()=>setShowAddTaskCreatorForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Task Creator</button>
-        <button onClick={()=>setShowAddReadOnlyUserForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Read-only User</button>
-        <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Delete Project</button>
-        <button onClick={handleUpdate} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Update Project</button>
-        <button onClick={() => setShowTaskForm(true)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">Add Task</button>
+        {admin && <button onClick={()=>setShowAddTaskCreatorForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Task Creator</button>}
+        {admin && <button onClick={()=>setShowAddReadOnlyUserForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Read-only User</button>}
+        {admin && <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Delete Project</button>}
+        {admin && <button onClick={handleUpdate} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Update Project</button>}
+        {(admin || isTaskCreator) && <button onClick={() => setShowTaskForm(true)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">Add Task</button>}
       </div>
       <h2 className="text-2xl font-semibold mt-6 mb-4">Tasks</h2>
       {tasks.length === 0 ? (
@@ -233,8 +242,8 @@ const ProjectPage = () => {
                   <p className="mt-2">Due Date: {new Date(task.due_date).toLocaleDateString()}</p>
               </div>
               <div className="flex space-x-2">
-                  <button onClick={() => openUpdateForm(task)} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Update Task</button>
-                  <button onClick={async () => {
+                  {isTaskCreator && <button onClick={() => openUpdateForm(task)} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Update Task</button>}
+                  {isTaskCreator && <button onClick={async () => {
                       try {
                           console.log(`Deleting task with ID: ${task.task_id}`);
                           await axios.delete(`http://localhost:8000/tasks/${task.task_id}`);
@@ -242,7 +251,7 @@ const ProjectPage = () => {
                       } catch (err) {
                           console.error('Failed to delete task', err);
                       }
-                  }} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Delete Task</button>
+                  }} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Delete Task</button>}
               </div>
           </div>
       )))}
