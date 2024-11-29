@@ -372,8 +372,8 @@ async def get_assigned_user(role_id: int, user_id: str, project_id: str, db: db_
         raise HTTPException(403, detail="Access Denied")
 
 
-@app.delete("/delete-user/{role_id}/{user_id}/{project_id}", status_code=status.HTTP_200_OK)
-async def delete_user_role(role_id: str, project_id: str, user_id: str, db: db_dependency):
+@app.delete("/delete-user/{role_id}/{user_id}/{project_id}/{assigned_user}", status_code=status.HTTP_200_OK)
+async def delete_user_role(role_id: str, project_id: str, user_id: str,assigned_user:str, db: db_dependency):
     admin = check_admin_id(user_id, db)
     if admin:
         db_user_roles = db.query(models.UserRole).filter(
@@ -382,7 +382,7 @@ async def delete_user_role(role_id: str, project_id: str, user_id: str, db: db_d
         if db_user_roles is None:
             raise HTTPException(status_code=404, detail="User role not found")
         for user_role in db_user_roles:
-            if user_role.role_id == role_id:
+            if user_role.role_id == role_id and assigned_user==user_role.employee_id:
                 db.delete(user_role)
         db.commit()
     else:
