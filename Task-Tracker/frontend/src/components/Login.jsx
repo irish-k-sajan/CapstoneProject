@@ -24,7 +24,7 @@ export default function Login() {
                     employee_email: res.profileObj.email,
                 };
     
-                await axios.post('http://localhost:8000/create-user/', newUser);
+                await axios.post(`http://localhost:8000/create-user/${res.profileObj.googleId}`, newUser);
                 console.log('New user added to the database');
                 navigate('/dashboard');
             }
