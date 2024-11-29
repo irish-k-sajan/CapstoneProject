@@ -33,7 +33,7 @@ export default function Login() {
         navigate('/login-unsuccessful');
     }
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="bg-orange-200 flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login to Task Tracker Application</h2>
                 <GoogleLogin
