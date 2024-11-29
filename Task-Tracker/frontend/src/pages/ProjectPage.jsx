@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Logout from '../components/Logout.jsx';
 import Select from 'react-select';
-
+const tC=2;
 const ProjectPage = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
@@ -18,7 +18,6 @@ const ProjectPage = () => {
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [taskStatus, setTaskStatus] = useState('new');
-
   const [taskOwnerId, setTaskOwnerId] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [showUpdateForm, setShowUpdateForm] = useState(false);
@@ -30,7 +29,8 @@ const ProjectPage = () => {
   const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
   const admin=(localStorage.getItem("is-admin")=="true");
   const [isTaskCreator,setIsTaskCreator]=useState(false);
-
+  const [taskCreators,setTaskCreators]=useState([])
+  const [taskReadOnlyUsers,setTaskReadOnlyUsers]=useState(null)
   const openUpdateForm = (task) => {
     setCurrentTask(task);
     setTaskId(task.task_id);
@@ -66,8 +66,10 @@ const ProjectPage = () => {
       try {
         const projectResponse = await axios.get(`http://localhost:8000/projects/${projectId}/${userId}`);
         const tasksResponse = await axios.get(`http://localhost:8000/${projectId}/tasks`);
-        const employeeResponse = await axios.get(`http://localhost:8000/user/${userId}`)
-        const roleResponse=await axios.get(`http://localhost:8000/user-role/${userId}/${projectId}`)
+        const employeeResponse = await axios.get(`http://localhost:8000/user/${userId}`);
+        const roleResponse=await axios.get(`http://localhost:8000/user-role/${userId}/${projectId}`);
+        const taskCreatorsResponse=await axios.get(`http://localhost:8000/user/2/${userId}/${projectId}`);
+        const taskReadOnlyUserResponse=await axios.get(`http://localhost:8000/user/3/${userId}/${projectId}`);
         if(roleResponse.data==2){
           setIsTaskCreator(true)
         }
@@ -81,7 +83,8 @@ const ProjectPage = () => {
         setProject(projectResponse.data);
         setTasks(tasksResponse.data);
         setEmployees(employeeOptions);
-        console.log(employees);
+        setTaskCreators(taskCreatorsResponse.data)
+        setTaskReadOnlyUsers(taskReadOnlyUserResponse.data)
       } catch (err) {
         setError(err.message);
       } finally {
@@ -158,8 +161,9 @@ const ProjectPage = () => {
       setShowSuccessMessage(true);
       setTimeout(() => {
         setShowSuccessMessage(false);
-      }, 2000);
-      setShowAddTaskCreatorForm(false);
+      }, 1000);
+      //setShowAddTaskCreatorForm(false);
+      setRefresh(refresh+1)
     }
     catch(e){
       console.error('Failed to add task creator', e);
@@ -181,8 +185,9 @@ const ProjectPage = () => {
       setShowSuccessMessage(true);
       setTimeout(() => {
         setShowSuccessMessage(false);
-      }, 2000);
-      setShowAddReadOnlyUserForm(false);
+      }, 1000);
+      //setShowAddReadOnlyUserForm(false);
+      setRefresh(refresh+1)
       
     }
     catch(e){
@@ -192,18 +197,18 @@ const ProjectPage = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gradient-to-b from-orange-500 to-gray-100 ">
+    <div className="min-h-screen p-4 bg-gradient-to-b bg-orange-200 ">
       <Logout/>
       <h1 className="text-5xl font-bold mb-4">{project.project_name}</h1>
       <p className="text-gray-700 mb-4">{project.project_description}</p>
       <p className="text-gray-700"><strong>Start Date:</strong> {new Date(project.start_date).toLocaleDateString()}</p>
       <p className="text-gray-700"><strong>End Date:</strong> {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'N/A'}</p>
-      <div className="flex space-x-4 mb-6 my-4">
-        {admin && <button onClick={()=>setShowAddTaskCreatorForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Task Creator</button>}
-        {admin && <button onClick={()=>setShowAddReadOnlyUserForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">Add Read-only User</button>}
-        {admin && <button onClick={handleDeleteProject} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">Delete Project</button>}
-        {admin && <button onClick={handleUpdate} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700">Update Project</button>}
-        {(admin || isTaskCreator) && <button onClick={() => setShowTaskForm(true)} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">Add Task</button>}
+      <div className="flex flex-wrap space-x-4 mb-6 my-4">
+        {admin && <button onClick={()=>setShowAddTaskCreatorForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 my-2">Add Task Creator</button>}
+        {admin && <button onClick={()=>setShowAddReadOnlyUserForm(true)} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 my-2">Add Read-only User</button>}
+        {admin && <button onClick={handleDeleteProject} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 my-2">Delete Project</button>}
+        {admin && <button onClick={handleUpdate} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700 my-2">Update Project</button>}
+        {(admin || isTaskCreator) && <button onClick={() => setShowTaskForm(true)} className="bg-green-500 text-white px-4 py-2 my-2 rounded hover:bg-green-700">Add Task</button>}
       </div>
       <h2 className="text-2xl font-semibold mt-6 mb-4">Tasks</h2>
       {tasks.length === 0 ? (
@@ -353,8 +358,31 @@ const ProjectPage = () => {
 )}
   {showAddTaskCreatorForm && (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
+            {taskCreators.length===0 ?(<h1>No task creators yet</h1>):(
+              taskCreators.map((taskCreator) => (
+                <div key={taskCreator.employee_id} className="task-item border p-2 px-4 mb-2 flex justify-between items-center rounded-lg bg-zinc-100 text-sm w-full">
+                    <div>
+                      <h3 className="font-bold">{taskCreator.employee_name}</h3>
+                      <p>{taskCreator.employee_email}</p>
+                    </div>
+                    <div>
+                    <button onClick={async ()=>{
+              
+                      try{
         
+                        await axios.delete(`http://localhost:8000/delete-user/2/${userId}/${projectId}/${taskCreator.employee_id}/`);
+                        console.log("hii")
+                      }
+                      catch(err){
+                        console.log("failed to delete:",err);
+                      }
+                      setRefresh(refresh+1);
+                    }}
+                    className="text-red-500 font-bold text-xs h-full hover:bg-red-100">Delete</button>
+                    </div>
+                  </div>
+                ) ))} 
             <h2 className="text-xl font-bold mb-4">Add Task Creator</h2>
             <form onSubmit={handleAddTaskCreator}>
                 <label className="block mb-2">
@@ -370,7 +398,7 @@ const ProjectPage = () => {
                 </label>
                 <div className="flex justify-end">
                     <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 mr-2">Add Task Creator</button>
-                    <button type="button" onClick={() => setShowAddTaskCreatorForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+                    <button type="button" onClick={() => setShowAddTaskCreatorForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Exit</button>
                 </div>
                 
             </form>
@@ -379,7 +407,29 @@ const ProjectPage = () => {
 )}
 {showAddReadOnlyUserForm && (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
+        {taskReadOnlyUsers.length===0 ?(<h1>No task Read Only Users yet</h1>):(
+              taskReadOnlyUsers.map((taskReadOnlyUser) => (
+                <div key={taskReadOnlyUser.employee_id} className="task-item border p-2 px-4 mb-2 flex justify-between items-center rounded-lg bg-zinc-100 text-sm w-full">
+                    <div>
+                      <h3 className="font-bold">{taskReadOnlyUser.employee_name}</h3>
+                      <p>{taskReadOnlyUser.employee_email}</p>
+                    </div>
+                    <button onClick={async ()=>{
+              
+                      try{
+        
+                        await axios.delete(`http://localhost:8000/delete-user/3/${userId}/${projectId}/${taskReadOnlyUser.employee_id}/`);
+                        console.log("hii")
+                      }
+                      catch(err){
+                        console.log("failed to delete:",err);
+                      }
+                      setRefresh(refresh+1);
+                    }}
+                    className="text-red-500 font-bold text-xs h-full hover:bg-red-100">Delete</button>
+                  </div>
+                ) ))}
             <h2 className="text-xl font-bold mb-4">Add Read-only user</h2>
             <form onSubmit={handleAddReadOnlyUser}>
                 <label className="block mb-2">
@@ -395,7 +445,7 @@ const ProjectPage = () => {
                 </label>
                 <div className="flex justify-end">
                     <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 mr-2">Add Read-only User</button>
-                    <button type="button" onClick={() => setShowAddReadOnlyUserForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
+                    <button type="button" onClick={() => setShowAddReadOnlyUserForm(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Exit</button>
                 </div>
             </form>
         </div>
