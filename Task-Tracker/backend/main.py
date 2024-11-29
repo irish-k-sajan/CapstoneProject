@@ -370,3 +370,18 @@ async def get_assigned_user(role_id: int, user_id: str, project_id: str, db: db_
         return Required_users
     else:
         raise HTTPException(403, detail="Access Denied")
+@app.delete("/delete-user/{role_id}/{user_id}/{project_id}", status_code=status.HTTP_200_OK)
+async def delete_user_role(role_id:str,project_id: str, user_id: str, db: db_dependency):
+    admin = check_admin_id(user_id, db)
+    if admin:
+        db_user_roles = db.query(models.UserRole).filter(
+            models.UserRole.project_id == project_id).all()
+
+        if db_user_roles is None:
+            raise HTTPException(status_code=404, detail="User role not found")
+        for user_role in db_user_roles:
+            if user_role.role_id==role_id:
+                db.delete(user_role)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403, detail="Access Denied")
