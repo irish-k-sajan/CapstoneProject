@@ -18,16 +18,12 @@ app.add_middleware(
 models.Base.metadata.create_all(bind=engine)
 
 
-
-
 class ProjectBase(BaseModel):
     project_name:  str
     project_description: str
     start_date: date
     end_date: date
     project_owner_id:  str
-
-
 
 
 class UpdateProjectBase(BaseModel):
@@ -45,7 +41,6 @@ class TaskBase(BaseModel):
     task_owner_id: str
     due_date: date
     project_id: str
-
 
 
 class UpdateTaskBase(BaseModel):
@@ -68,14 +63,10 @@ class RoleBase(BaseModel):
     role_name:  str
 
 
-
-
 class UserRoleBase(BaseModel):
     role_id:  int
     project_id:  str
     employee_id:  str
-
-
 
 
 class UpdateUserRoleBase(BaseModel):
@@ -86,8 +77,6 @@ class UpdateUserRoleBase(BaseModel):
 
 class AdminBase(BaseModel):
     employee_id:  str
-
-
 
 
 class AdminBase(BaseModel):
@@ -369,12 +358,14 @@ async def get_assigned_user(role_id: int, user_id: str, project_id: str, db: db_
         if role_id == 2:
             for user in users:
                 if user.role_id == 2:
-                    Task_creator=db.query(models.Employee).filter(models.Employee.employee_id==user.employee_id).first()
+                    Task_creator = db.query(models.Employee).filter(
+                        models.Employee.employee_id == user.employee_id).first()
                     Required_users.append(Task_creator)
         else:
             for user in users:
                 if user.role_id == 3:
-                    Read_only_user=db.query(models.Employee).filter(models.Employee.employee_id==user.employee_id).first()
+                    Read_only_user = db.query(models.Employee).filter(
+                        models.Employee.employee_id == user.employee_id).first()
                     Required_users.append(Read_only_user)
         return Required_users
     else:
