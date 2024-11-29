@@ -210,7 +210,7 @@ async def delete_task(task_id: str, user_id: str, project_id: str, db: db_depend
         raise HTTPException(status_code=403, detail="Access Denied")
 
 
-def delete_user_role(project_id: str, user_id: str, db: db_dependency):
+def delete_user_role_internal(project_id: str, user_id: str, db: db_dependency):
     admin = check_admin_id(user_id, db)
     if admin:
         db_user_roles = db.query(models.UserRole).filter(
@@ -234,7 +234,7 @@ async def delete_project(project_id: str, user_id: str, db: db_dependency):
             models.Project.project_id == project_id).first()
         if project is None:
             raise HTTPException(status_code=404, detail="Project not found")
-        delete_user_role(project_id, user_id, db)
+        delete_user_role_internal(project_id, user_id, db)
         db.delete(project)
         db.commit()
     else:
