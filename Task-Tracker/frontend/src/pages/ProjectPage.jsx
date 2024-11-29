@@ -31,6 +31,11 @@ const ProjectPage = () => {
   const [isTaskCreator,setIsTaskCreator]=useState(false);
   const [taskCreators,setTaskCreators]=useState([])
   const [taskReadOnlyUsers,setTaskReadOnlyUsers]=useState(null)
+  const filteredEmployees=employees.filter(employee => 
+    !(taskCreators.find(taskCreator => taskCreator.employee_id === employee.value||(
+      taskReadOnlyUsers.find(taskReadOnlyUser=>taskReadOnlyUser.employee_id===employee.value)
+    )))
+  );
   const openUpdateForm = (task) => {
     setCurrentTask(task);
     setTaskId(task.task_id);
@@ -68,8 +73,12 @@ const ProjectPage = () => {
         const tasksResponse = await axios.get(`http://localhost:8000/${projectId}/tasks`);
         const employeeResponse = await axios.get(`http://localhost:8000/user/${userId}`);
         const roleResponse=await axios.get(`http://localhost:8000/user-role/${userId}/${projectId}`);
+        if(admin){
         const taskCreatorsResponse=await axios.get(`http://localhost:8000/user/2/${userId}/${projectId}`);
         const taskReadOnlyUserResponse=await axios.get(`http://localhost:8000/user/3/${userId}/${projectId}`);
+        setTaskCreators(taskCreatorsResponse.data)
+        setTaskReadOnlyUsers(taskReadOnlyUserResponse.data)
+        }
         if(roleResponse.data==2){
           setIsTaskCreator(true)
         }
@@ -83,8 +92,8 @@ const ProjectPage = () => {
         setProject(projectResponse.data);
         setTasks(tasksResponse.data);
         setEmployees(employeeOptions);
-        setTaskCreators(taskCreatorsResponse.data)
-        setTaskReadOnlyUsers(taskReadOnlyUserResponse.data)
+        
+        
       } catch (err) {
         setError(err.message);
       } finally {
@@ -168,7 +177,7 @@ const ProjectPage = () => {
     catch(e){
       console.error('Failed to add task creator', e);
     }
-
+    setSelectedEmployee(null);
 
   }
   const handleAddReadOnlyUser=async(e)=>{
@@ -193,7 +202,7 @@ const ProjectPage = () => {
     catch(e){
       console.error('Failed to add read only user', e);
     }
-
+    setSelectedEmployee(null);
   }
 
   return (
@@ -388,7 +397,7 @@ const ProjectPage = () => {
                 <label className="block mb-2">
                     User
                     <Select
-                            options={employees}
+                            options={filteredEmployees}
                             value={selectedEmployee}
                             onChange={(selectedOption)=>setSelectedEmployee(selectedOption)}
                             isSearchable
@@ -435,7 +444,7 @@ const ProjectPage = () => {
                 <label className="block mb-2">
                     User
                     <Select
-                            options={employees}
+                            options={filteredEmployees}
                             value={selectedEmployee}
                             onChange={(selectedOption)=>setSelectedEmployee(selectedOption)}
                             isSearchable
