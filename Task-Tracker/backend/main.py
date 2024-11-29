@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI,  HTTPException,  Depends,  status
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import models
@@ -18,12 +18,16 @@ app.add_middleware(
 models.Base.metadata.create_all(bind=engine)
 
 
+
+
 class ProjectBase(BaseModel):
-    project_name: str
+    project_name:  str
     project_description: str
     start_date: date
     end_date: date
-    project_owner_id: str
+    project_owner_id:  str
+
+
 
 
 class UpdateProjectBase(BaseModel):
@@ -43,6 +47,7 @@ class TaskBase(BaseModel):
     project_id: str
 
 
+
 class UpdateTaskBase(BaseModel):
     task_name: Optional[str] = None
     task_description: Optional[str] = None
@@ -59,14 +64,18 @@ class EmployeeBase(BaseModel):
 
 
 class RoleBase(BaseModel):
-    role_id: int
-    role_name: str
+    role_id:  int
+    role_name:  str
+
+
 
 
 class UserRoleBase(BaseModel):
-    role_id: int
-    project_id: str
-    employee_id: str
+    role_id:  int
+    project_id:  str
+    employee_id:  str
+
+
 
 
 class UpdateUserRoleBase(BaseModel):
@@ -76,7 +85,9 @@ class UpdateUserRoleBase(BaseModel):
 
 
 class AdminBase(BaseModel):
-    employee_id: str
+    employee_id:  str
+
+
 
 
 class AdminBase(BaseModel):
@@ -147,7 +158,7 @@ async def create_task(project_id: str, user_id: str, task: TaskBase, db: db_depe
 async def get_user(user_id: str, db: db_dependency):
     users = db.query(models.Employee).all()
     if users is None:
-        raise HTTPException(status_code=404, detail="No projects")
+        raise HTTPException(status_code=404,  detail="No projects")
     return users
 
 
@@ -182,7 +193,7 @@ async def read_user_role(user_id: str, db: db_dependency):
     projects = db.query(models.UserRole).filter(
         models.UserRole.employee_id == user_id).all()
     if projects is None:
-        raise HTTPException(status_code=404, detail='Projects not found')
+        raise HTTPException(status_code=404,  detail='Projects not found')
     return projects
 
 
@@ -190,7 +201,7 @@ async def read_user_role(user_id: str, db: db_dependency):
 async def read_task(task_id: str, db: db_dependency):
     task = db.query(models.Task).filter(models.Task.task_id == task_id).first()
     if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
+        raise HTTPException(status_code=404,  detail="Task not found")
     return task
 
 
@@ -255,7 +266,7 @@ async def get_projects(user_id: str, db: db_dependency):
             projects.append(db.query(models.Project).filter(
                 models.Project.project_id == i).first())
     if projects is None:
-        raise HTTPException(status_code=404, detail="No projects")
+        raise HTTPException(status_code=404,  detail="No projects")
     return projects
 
 
@@ -263,7 +274,7 @@ async def get_projects(user_id: str, db: db_dependency):
 async def get_tasks(project_id: str, db: db_dependency):
     tasks = db.query(models.Task).all()
     if tasks is None:
-        raise HTTPException(status_code=404, detail="No projects")
+        raise HTTPException(status_code=404,  detail="No projects")
     return tasks
 
 
