@@ -111,7 +111,9 @@ def get_user_role_project_internal(user_id: str, project_id: str, db: db_depende
         return user.role_id
     else:
         return 0
-
+@app.get("/")
+async def hello():
+    return "Hello"
 
 @app.post("/create-project/{user_id}", status_code=status.HTTP_201_CREATED)
 async def create_project(user_id: str, project: ProjectBase, db: db_dependency):
