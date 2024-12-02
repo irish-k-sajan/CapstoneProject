@@ -400,12 +400,6 @@ def create_read_only_user(user_id:str,project_id:str,task_id:str,task_user:TaskU
             return {"detail":"Read Only User Exists"}
         db_read_only_user = models.TaskUserRole(**task_user.dict())
         db.add(db_read_only_user)
-        # user_role={
-        # "role_id":3,
-        # "employee_id":task_user.employee_id,
-        # "project_id":project_id}
-        # db_user_role=models.UserRole(**user_role)
-        # db.add(db_user_role)
         db.commit()
         return {"detail": "Success"}
         
