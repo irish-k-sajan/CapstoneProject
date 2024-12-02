@@ -397,6 +397,10 @@ def create_read_only_user(user_id:str,project_id:str,task_id:str,task_user:TaskU
     admin=check_admin_id(user_id,db)
     Task_creator=get_user_role_project_internal(user_id,project_id,db)
     if admin or Task_creator==2:
+        exist_user=db.query(models.TaskUserRole).filter(models.TaskUserRole.task_id==task_user.task_id,
+        models.TaskUserRole.employee_id==task_user.employee_id).first()
+        if exist_user:
+            return {"detail":"Read Only User Exists"}
         db_read_only_user = models.TaskUserRole(**task_user.dict())
         db.add(db_read_only_user)
         db.commit()
