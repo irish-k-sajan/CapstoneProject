@@ -26,6 +26,7 @@ class Task(Base):
     project_id = Column(String(50), ForeignKey('projects.project_id'), nullable=False)
     project = relationship("Project", back_populates="task")
     task_owner = relationship("Employee", back_populates="tasks")
+    user_task=relationship("TaskUserRole",back_populates="task_user")
 
 
 class Employee(Base):
@@ -37,6 +38,7 @@ class Employee(Base):
     tasks = relationship("Task", back_populates="task_owner")
     emp_user=relationship("UserRole",back_populates="user_emp")
     emp_admin=relationship("Admin",back_populates="admin_emp")
+    emp_task=relationship("TaskUserRole",back_populates="task_emp")
 class Role(Base):
     __tablename__='role'
     role_id=Column(Integer,primary_key=True,autoincrement=True)
@@ -57,6 +59,13 @@ class Admin(Base):
     admin_id=Column(Integer,primary_key=True,autoincrement=True)
     employee_id=Column(String(50), ForeignKey('employees.employee_id'),nullable=False)
     admin_emp=relationship("Employee",back_populates="emp_admin")
+class TaskUserRole(Base):
+    __tablename__='task_users'
+    task_user_id=Column(Integer,primary_key=True,autoincrement=True)
+    task_id=Column(String(50), ForeignKey('tasks.task_id'), nullable=False)
+    employee_id=Column(String(50), ForeignKey('employees.employee_id'),nullable=False)
+    task_emp=relationship("Employee",back_populates="emp_task")
+    task_user=relationship("Task",back_populates="user_task")
 
 
 
