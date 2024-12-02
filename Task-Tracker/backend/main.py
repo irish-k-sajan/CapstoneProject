@@ -25,7 +25,9 @@ class ProjectBase(BaseModel):
     end_date: date
     project_owner_id:  str
 
-
+class TaskUserRoleBase(BaseModel):
+    task_id:str
+    employee_id:str
 class UpdateProjectBase(BaseModel):
     project_name: Optional[str] = None
     project_description: Optional[str] = None
@@ -204,6 +206,9 @@ async def delete_task(task_id: str, user_id: str, project_id: str, db: db_depend
             models.Task.task_id == task_id).first()
         if task is None:
             raise HTTPException(status_code=404, detail="Task not found")
+        task_users=db.query(models.TaskUserRole).filter(models.TaskUserRole.task_id==task_id).all()
+        for task_user in task_users:
+            db.delete(task_user)
         db.delete(task)
         db.commit()
     else:
@@ -374,7 +379,6 @@ async def get_assigned_user(role_id: int, user_id: str, project_id: str, db: db_
 
 @app.delete("/delete-user/{role_id}/{user_id}/{project_id}/{assigned_user}", status_code=status.HTTP_200_OK)
 async def delete_user_role(role_id: str, project_id: str, user_id: str,assigned_user:str, db: db_dependency):
-    print("delete")
     admin = check_admin_id(user_id, db)
     if admin:
         db_user_roles = db.query(models.UserRole).filter(
@@ -388,3 +392,38 @@ async def delete_user_role(role_id: str, project_id: str, user_id: str,assigned_
         db.commit()
     else:
         raise HTTPException(status_code=403, detail="Access Denied")
+@app.post('/create-read-only-user/{user_id}/{project_id}/{task_id}',status_code=status.HTTP_201_CREATED)
+def create_read_only_user(user_id:str,project_id:str,task_id:str,task_user:TaskUserRoleBase,db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    Task_creator=get_user_role_project_internal(user_id,project_id,db)
+    if admin or Task_creator==2:
+        db_read_only_user = models.TaskUserRole(**task_user.dict())
+        db.add(db_read_only_user)
+        db.commit()
+        return {"detail": "Success"}
+        
+    else:
+        raise HTTPException(status_code=403,detail="Access Denied")
+@app.delete('/delete-read-only-user/{creator_user_id}/{project_id}/{user_id}/{task_id}',status_code=status.HTTP_200_OK)
+def delete_read_only_user(creator_user_id:str,project_id:str,user_id:str,task_id:str,db:db_dependency):
+    admin=check_admin_id(creator_user_id,db)
+    Task_creator=get_user_role_project_internal(creator_user_id,project_id,db)
+    if admin or Task_creator==2:
+        db_user_roles = db.query(models.TaskUserRole).filter(
+            models.TaskUserRole.task_id == task_id,
+            models.TaskUserRole.employee_id==user_id).first()
+
+        if db_user_roles is None:
+            raise HTTPException(status_code=404, detail="Read Only user not found")
+        db.delete(db_user_roles)
+        db.commit()
+    else:
+        raise HTTPException(status_code=403, detail="Access Denied")
+@app.get('/task/read-only-user/{project_id}/{user_id}',status_code=status.HTTP_200_OK)
+def read_only_user(project_id: str,user_id:str,db:db_dependency):
+    user_tasks=db.query(models.TaskUserRole).filter(models.TaskUserRole.employee_id==user_id).all()
+    Filtered_tasks=[]
+    for task in user_tasks:
+        Filtered_tasks.append(db.query(models.Task).filter(models.Task.project_id==project_id,
+        models.Task.task_id==task.task_id).first())
+    return Filtered_tasks
