@@ -427,3 +427,15 @@ def read_only_user(project_id: str,user_id:str,db:db_dependency):
         Filtered_tasks.append(db.query(models.Task).filter(models.Task.project_id==project_id,
         models.Task.task_id==task.task_id).first())
     return Filtered_tasks
+@app.get('/project/read-only-users/{project_id}/{task_id}/{user_id}',status_code=status.HTTP_200_OK)
+def get_read_only_users_tasks(project_id:str,task_id:str,user_id: str,db:db_dependency):
+    admin=check_admin_id(user_id,db)
+    Task_creator=get_user_role_project_internal(user_id,project_id,db)
+    if admin or Task_creator==2:
+        db_users_id=db.query(models.TaskUserRole).filter(models.TaskUserRole.task_id==task_id).all()
+        user_details=[]
+        for user in db_users_id:
+            user_details.append(db.query(models.Employee).filter(models.Employee.employee_id==user.employee_id)).first()
+        return user_details
+    else:
+        raise HTTPException(status_code=403, detail="Access Denied")
