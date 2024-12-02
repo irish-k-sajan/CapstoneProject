@@ -403,6 +403,12 @@ def create_read_only_user(user_id:str,project_id:str,task_id:str,task_user:TaskU
             return {"detail":"Read Only User Exists"}
         db_read_only_user = models.TaskUserRole(**task_user.dict())
         db.add(db_read_only_user)
+        user_role=UserRoleBase()
+        user_role.role_id=3
+        user_role.employee_id=task_user.employee_id
+        user_role.project_id=project_id
+        db_user_role=models.UserRole(**user_role.dict())
+        db.add(db_user_role)
         db.commit()
         return {"detail": "Success"}
         
@@ -419,6 +425,7 @@ def delete_read_only_user(creator_user_id:str,project_id:str,user_id:str,task_id
 
         if db_user_roles is None:
             raise HTTPException(status_code=404, detail="Read Only user not found")
+        delete_user_role_internal(project_id,user_id,db)
         db.delete(db_user_roles)
         db.commit()
     else:
