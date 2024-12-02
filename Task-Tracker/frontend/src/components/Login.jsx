@@ -21,7 +21,6 @@ export default function Login() {
             };    
     
                 await axios.post(`http://localhost:8000/create-user/${res.profileObj.googleId}`, newUser);
-                console.log('New user added to the database');
                 navigate('/dashboard');
             }
          catch (err) {
@@ -33,7 +32,7 @@ export default function Login() {
         navigate('/login-unsuccessful');
     }
     return (
-        <div className="bg-orange-200 flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-lg">
                 <h2 className="text-2xl font-bold mb-6 text-center">Login to Task Tracker Application</h2>
                 <GoogleLogin

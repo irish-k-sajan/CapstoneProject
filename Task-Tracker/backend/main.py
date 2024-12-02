@@ -266,7 +266,7 @@ async def get_projects(user_id: str, db: db_dependency):
 
 @app.get('/{project_id}/tasks/', status_code=status.HTTP_200_OK)
 async def get_tasks(project_id: str, db: db_dependency):
-    tasks = db.query(models.Task).all()
+    tasks = db.query(models.Task).filter(models.Task.project_id==project_id).all()
     if tasks is None:
         raise HTTPException(status_code=404,  detail="No projects")
     return tasks
@@ -319,17 +319,14 @@ async def create_role(user_id: str, role: RoleBase, db: db_dependency):
 @app.post('/create-user-role/{user_id}', status_code=status.HTTP_201_CREATED)
 async def create_user_role(user_id: str, user_role: UserRoleBase, db: db_dependency):
     admin = check_admin_id(user_id, db)
-    if admin:
-        exist_user = db.query(models.UserRole).filter(models.UserRole.employee_id == user_role.employee_id,
+    exist_user = db.query(models.UserRole).filter(models.UserRole.employee_id == user_role.employee_id,
                                                       models.UserRole.project_id == user_role.project_id).first()
-        if exist_user:
-            return {"detail": "User already exists"}
-        db_role = models.UserRole(**user_role.dict())
-        db.add(db_role)
-        db.commit()
-        return {"detail": "Success"}
-    else:
-        raise HTTPException(status_code=403, detail="Access Denied")
+    if exist_user:
+        return {"detail": "User already exists"}
+    db_role = models.UserRole(**user_role.dict())
+    db.add(db_role)
+    db.commit()
+    return {"detail": "Success"}
 
 
 @app.put('/update-user-role/{user_role_id}/{user_id}', status_code=status.HTTP_202_ACCEPTED)
@@ -403,12 +400,6 @@ def create_read_only_user(user_id:str,project_id:str,task_id:str,task_user:TaskU
             return {"detail":"Read Only User Exists"}
         db_read_only_user = models.TaskUserRole(**task_user.dict())
         db.add(db_read_only_user)
-        user_role=UserRoleBase()
-        user_role.role_id=3
-        user_role.employee_id=task_user.employee_id
-        user_role.project_id=project_id
-        db_user_role=models.UserRole(**user_role.dict())
-        db.add(db_user_role)
         db.commit()
         return {"detail": "Success"}
         
@@ -425,7 +416,9 @@ def delete_read_only_user(creator_user_id:str,project_id:str,user_id:str,task_id
 
         if db_user_roles is None:
             raise HTTPException(status_code=404, detail="Read Only user not found")
-        delete_user_role_internal(project_id,user_id,db)
+        user_role=db.query(models.UserRole).filter(models.UserRole.employee_id==user_id,
+                                                   models.UserRole.project_id==project_id).first()
+        db.delete(user_role)
         db.delete(db_user_roles)
         db.commit()
     else:
@@ -437,12 +430,16 @@ def read_only_user(project_id: str,user_id:str,db:db_dependency):
     for task in user_tasks:
         Filtered_tasks.append(db.query(models.Task).filter(models.Task.project_id==project_id,
         models.Task.task_id==task.task_id).first())
+        Filtered_tasks=list(filter(None,Filtered_tasks))
+    print(Filtered_tasks)
+    
     return Filtered_tasks
 @app.get('/project/read-only-users/{project_id}/{task_id}/{user_id}',status_code=status.HTTP_200_OK)
 def get_read_only_users_tasks(project_id:str,task_id:str,user_id: str,db:db_dependency):
     admin=check_admin_id(user_id,db)
     Task_creator=get_user_role_project_internal(user_id,project_id,db)
     if admin or Task_creator==2:
+        print("Hi")
         db_users_id=db.query(models.TaskUserRole).filter(models.TaskUserRole.task_id==task_id).all()
         user_details=[]
         for user in db_users_id:
