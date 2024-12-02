@@ -3,13 +3,13 @@ import Logout from "../components/Logout";
 
 export default function Dashboard(){
     const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
+    const userName=JSON.parse(localStorage.getItem("user-details")).profileObj.name;
     const admin=(localStorage.getItem("is-admin")=="true");
-    console.log("admin value",admin);
     return (
-      <div className="bg-orange-200 p-4">
+      <div className="p-4">
         <Logout/>
-        <div className="min-h-screen flex flex-col items-center justify-center bg-orange-200 p-4">
-      <h1 className="text-4xl font-bold mb-4">Welcome to the Task Tracker Application</h1>
+        <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <h1 className="text-4xl font-bold mb-4">Welcome {userName}</h1>
       
       <p className="text-lg mb-8">Manage your projects efficiently.</p>
       <div className="flex space-x-4">

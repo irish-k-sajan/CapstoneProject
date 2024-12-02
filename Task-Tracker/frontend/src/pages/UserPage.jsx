@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const UserPage = () => {
     const [users, setUsers] = useState([]);
@@ -19,8 +20,9 @@ const UserPage = () => {
     }, []);
 
     return (
-        <div>
-        {admin ? <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+        <div className='p-4'>
+        <Link to="/dashboard" className='text-xl text-gray-700 hover:text-gray-900'>Dashboard</Link>
+        {admin ? <div className="min-h-screen flex flex-col items-center justify-center p-4">
             <h1 className="text-4xl font-bold mb-4">User List</h1>
             <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
                 <table className="min-w-full divide-y divide-gray-200">

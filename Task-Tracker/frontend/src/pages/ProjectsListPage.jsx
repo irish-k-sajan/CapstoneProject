@@ -11,6 +11,7 @@ const ProjectsListPage = () => {
   const navigate = useNavigate();
   const userId=JSON.parse(localStorage.getItem("user-details")).googleId;
   const admin=(localStorage.getItem("is-admin")=="true");
+  const dashboard="Dashboard";
   useEffect(() => {
     const getProjects = async () => {
       try {
@@ -36,7 +37,8 @@ const ProjectsListPage = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="min-h-screen p-4 bg-orange-300">
+    <div className="min-h-screen p-4">
+      <Link to="/dashboard" className='text-xl text-gray-700 hover:text-gray-900'>{dashboard}</Link>
       <Logout/>
       <h1 className="text-5xl font-bold mb-6">Projects</h1>
       {admin && <button
@@ -50,7 +52,7 @@ const ProjectsListPage = () => {
       ) : (
         projects.map((project) => (
           <Link to={`/projects/${project.project_id}`} key={project.project_id} className="block mb-4">
-            <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow duration-300 bg-gradient-to-r from-gray-200 to-gray-300">
+            <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow duration-300 bg-gray-200 border border-gray-400">
               <h2 className="text-2xl font-semibold mb-2">{project.project_name}</h2>
               <p className="text-gray-700 mb-4">{project.project_description}</p>
               <p className="text-gray-500"><strong>Start Date:</strong> {new Date(project.start_date).toLocaleDateString()}</p>
